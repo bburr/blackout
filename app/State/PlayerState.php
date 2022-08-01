@@ -38,6 +38,15 @@ class PlayerState extends AbstractState
         ];
     }
 
+    public static function loadFromSaveData(array $playerData): static
+    {
+        $user = (new User)->setAttribute('uuid', $playerData['user_id']);
+        $player = new static($user);
+        $player->setHandFromArray($playerData['hand']);
+
+        return $player;
+    }
+
     public function setHandFromArray(array $handData): void
     {
         foreach ($handData as $cardData) {

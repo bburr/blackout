@@ -21,6 +21,7 @@ class DealCardsCommand extends Command
 
         for ($i = 0; $i < $this->argument('numPerPlayer'); $i++) {
             foreach ($gameState->getPlayersInDealingOrder() as $player) {
+                // todo convert to job?
                 (new DealCard())($player, $gameState->getCardShoeState());
             }
         }

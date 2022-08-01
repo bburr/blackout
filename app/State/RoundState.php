@@ -40,6 +40,17 @@ class RoundState extends AbstractState
         ];
     }
 
+    public static function loadFromSaveData(array $roundData): static
+    {
+        $round = (new RoundState($roundData['round_number'], $roundData['num_cards'], $roundData['is_num_cards_ascending']));
+
+        if (isset($roundData['trump_card'])) {
+            $round->setTrumpCard(new CardState($roundData['trump_card']['suit'], $roundData['trump_card']['value']));
+        }
+
+        return $round;
+    }
+
     public function setIsNumCardsAscending(bool $value)
     {
         $this->isNumCardsAscending = $value;

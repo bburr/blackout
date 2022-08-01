@@ -100,29 +100,20 @@ class GameState extends AbstractState
 
     protected function loadGame()
     {
-        // todo figure out a better way to serialize the data to avoid this class needing to know how the data is structured (or have static methods for the state models)
         $gameStateData = $this->cacheGet(self::GAME_STATE_CACHE_KEY);
         $this->dealerIndex = $gameStateData['dealer_index'];
         // todo load settings
         $this->gameSettings = (new GameSettings());
 
         foreach ($this->cacheGet(self::PLAYERS_CACHE_KEY) as $playerData) {
-            $user = (new User)->setAttribute('uuid', $playerData['user_id']);
-            $player = new PlayerState($user);
-            $player->setHandFromArray($playerData['hand']);
-            $this->players->add($player);
+            $this->players->add(PlayerState::loadFromSaveData($playerData));
         }
 
         $cardShoeData = $this->cacheGet(self::CARD_SHOE_CACHE_KEY);
-        $this->shoe = (new CardShoeState(null))
-            ->setCardsFromArray($cardShoeData['cards']);
+        $this->shoe = CardShoeState::loadFromSaveData($cardShoeData);
 
-        $roundData = $this->cacheGet(self::CURRENT_ROUND_CACHE_KEY);
-        $this->currentRound = (new RoundState($roundData['round_number'], $roundData['num_cards'], $roundData['is_num_cards_ascending']));
-
-        if (isset($roundData['trump_card'])) {
-            $this->currentRound->setTrumpCard(new CardState($roundData['trump_card']['suit'], $roundData['trump_card']['value']));
-        }
+        $currentRoundData = $this->cacheGet(self::CURRENT_ROUND_CACHE_KEY);
+        $this->currentRound = RoundState::loadFromSaveData($currentRoundData);
 
         // todo load previousRounds
     }

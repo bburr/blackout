@@ -40,6 +40,12 @@ class CardShoeState extends AbstractState
         ];
     }
 
+    public static function loadFromSaveData(array $cardShoeData): static
+    {
+        return (new CardShoeState(null))
+            ->setCardsFromArray($cardShoeData['cards']);
+    }
+
     public function setCardsFromArray(array $cards): self
     {
         $this->cards = collect();
