@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('lobbies', function (Blueprint $table) {
+        Schema::create('games', function (Blueprint $table) {
             $table->uuid();
-            $table->string('invite_code');
+            $table->uuid('lobby_uuid');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('lobbies');
+        Schema::dropIfExists('games');
     }
 };

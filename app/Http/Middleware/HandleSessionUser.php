@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -9,19 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HandleSessionUser
 {
-    const CACHE_KEY = 'session-user-id';
-
     public function handle(Request $request, Closure $next)
     {
-        if (! Session::has(self::CACHE_KEY)) {
+        if (! Session::has(User::CACHE_KEY_USER_ID)) {
             return abort(Response::HTTP_UNAUTHORIZED);
         }
 
         $request->merge([
-            'auth_user_id' => Session::get(self::CACHE_KEY),
+            'auth_user_id' => (string) Session::get(User::CACHE_KEY_USER_ID),
         ]);
-
-        dump(Session::all());
 
         return $next($request);
     }

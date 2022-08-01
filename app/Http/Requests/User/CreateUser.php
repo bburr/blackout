@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
-class CreateLobby extends Request
+use App\Http\Requests\Request;
+
+class CreateUser extends Request
 {
     /**
      * Get the validation rules that apply to the request.
@@ -12,6 +14,7 @@ class CreateLobby extends Request
     public function rules()
     {
         return [
+            'name' => 'required',
         ];
     }
 }
