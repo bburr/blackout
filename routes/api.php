@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\LobbyController;
+use App\Http\Controllers\RoundController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\HandleSessionUser;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,17 @@ Route::group(['middleware' => [HandleSessionUser::class]], function () {
 
     // Game
     Route::post('game/start-game', [GameController::class, 'startGame']);
+
+    // Round
+    Route::post('round/perform-bet', [RoundController::class, 'performBet']);
+    Route::post('round/play-card', [RoundController::class, 'playCard']);
+    Route::post('round/start-next-round', [RoundController::class, 'startNextRound']);
 });
 
 Route::group(['prefix' => 'admin'], function () {
     Route::post('user/create-other-user', [UserController::class, 'createOtherUser']);
     Route::post('lobby/add-user-to-lobby', [LobbyController::class, 'addUserToLobby']);
+    Route::post('round/perform-bet-as-user', [RoundController::class, 'performBetAsUser']);
+    Route::post('round/play-card-as-user', [RoundController::class, 'playCardAsUser']);
+    Route::post('round/start-next-round-as-user', [RoundController::class, 'startNextRoundAsUser']);
 });

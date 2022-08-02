@@ -56,8 +56,6 @@ class GameController extends Controller
 
         (new GameState($game, $gameSettings))->save();
 
-        Session::put(Game::CACHE_KEY_CURRENT_GAME_ID, $game->getKey());
-
         // todo send websocket msg to other players
 
         return response()->json($game);

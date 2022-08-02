@@ -46,13 +46,48 @@ class GameState extends AbstractState
         $this->previousRounds->add($roundScoreState);
     }
 
+    public function advanceBettingPlayerIndex(): void
+    {
+        // todo combine logic with player index logic
+        $bettingPlayerIndex = $this->getCurrentRound()->getNextPlayerIndexToBet();
+
+        if ($bettingPlayerIndex === $this->dealerIndex) {
+            $bettingPlayerIndex = -1;
+        }
+
+        if ($bettingPlayerIndex >= 0) {
+            $bettingPlayerIndex++;
+        }
+
+        if ($bettingPlayerIndex >= $this->players->count()) {
+            $bettingPlayerIndex = 0;
+        }
+
+        $this->getCurrentRound()->setNextPlayerIndexToBet($bettingPlayerIndex);
+    }
+
     public function advanceDealerIndex(): void
     {
-        $this->dealerIndex++;
+        $this->dealerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
+    }
 
-        if ($this->dealerIndex >= $this->players->count()) {
-            $this->dealerIndex = 0;
+    public function advancePlayerIndex(): void
+    {
+        $playerIndex = $this->getCurrentRound()->getNextPlayerIndexToPlay();
+
+        if ($playerIndex === $this->dealerIndex) {
+            $playerIndex = -1;
         }
+
+        if ($playerIndex >= 0) {
+            $playerIndex++;
+        }
+
+        if ($playerIndex >= $this->players->count()) {
+            $playerIndex = 0;
+        }
+
+        $this->getCurrentRound()->setNextPlayerIndexToPlay($playerIndex);
     }
 
     protected function cacheKey(string $cacheKey): string
@@ -75,9 +110,35 @@ class GameState extends AbstractState
         return $this->players[$this->dealerIndex];
     }
 
+    public function getDealerIndex(): int
+    {
+        return $this->dealerIndex;
+    }
+
     public function getGameSettings(): GameSettings
     {
         return $this->gameSettings;
+    }
+
+    public function getPlayerAtIndex(int $index): ?PlayerState
+    {
+        return $this->players->get($index);
+    }
+
+    public function getPlayerIndexAfter(int $index): int
+    {
+        $index++;
+
+        if ($index >= $this->players->count()) {
+            $index = 0;
+        }
+
+        return $index;
+    }
+
+    public function getPlayers(): Collection
+    {
+        return $this->players;
     }
 
     /**
@@ -94,7 +155,7 @@ class GameState extends AbstractState
         }
     }
 
-    protected function initGame()
+    protected function initGame(): void
     {
         foreach ($this->game->getUsers() as $user) {
             $this->players->add(new PlayerState($user));
@@ -114,7 +175,7 @@ class GameState extends AbstractState
         ];
     }
 
-    protected function loadGame()
+    protected function loadGame(): void
     {
         $gameStateData = $this->cacheGet(self::GAME_STATE_CACHE_KEY);
         $this->dealerIndex = $gameStateData['dealer_index'];
@@ -134,7 +195,31 @@ class GameState extends AbstractState
         // todo load previousRounds
     }
 
-    public function save()
+    public function makeBetForNextPlayer(int $bet)
+    {
+        $this->getCurrentRound()->makeBetForNextPlayer($bet);
+        $this->advanceBettingPlayerIndex();
+    }
+
+    public function makePlayForNextPlayer(CardState $cardState)
+    {
+        /** @var PlayerState $player */
+        $player = $this->getPlayerAtIndex($this->getCurrentRound()->getNextPlayerIndexToPlay());
+
+        $index = $player->getHand()->search($cardState);
+
+        if ($index === false) {
+            // todo exception
+            throw new \LogicException('Player does not have that card');
+        }
+
+        // todo business logic for valid card play
+        $this->getCurrentRound()->makePlayForNextPlayer($cardState);
+        $player->getHand()->forget($index);
+        $this->advancePlayerIndex();
+    }
+
+    public function save(): void
     {
         $this->cachePut(self::GAME_STATE_CACHE_KEY, $this);
         $this->cachePut(self::PLAYERS_CACHE_KEY, $this->players);
@@ -143,12 +228,12 @@ class GameState extends AbstractState
         $this->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRounds);
     }
 
-    public function setCurrentRound(RoundState $roundState)
+    public function setCurrentRound(RoundState $roundState): void
     {
         $this->currentRound = $roundState;
     }
 
-    public function setShoe(CardShoeState $cardShoeState)
+    public function setShoe(CardShoeState $cardShoeState): void
     {
         $this->shoe = $cardShoeState;
     }

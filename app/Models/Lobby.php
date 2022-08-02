@@ -9,10 +9,6 @@ class Lobby extends Model
 {
     const CACHE_KEY_CURRENT_LOBBY_ID = 'current-lobby-id';
 
-    protected $fillable = [
-        'owner_id',
-    ];
-
     protected static function boot()
     {
         parent::boot();

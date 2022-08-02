@@ -3,19 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Game extends Model
 {
-    const CACHE_KEY_CURRENT_GAME_ID = 'current-game-id';
-
     protected $fillable = [
         'lobby_uuid',
     ];
 
+    public function getLobby(): Lobby
+    {
+        return $this->getAttribute('lobby');
+    }
+
     public function getUsers(): Collection
     {
         return $this->getAttribute('users');
+    }
+
+    public function lobby(): BelongsTo
+    {
+        return $this->belongsTo(Lobby::class);
     }
 
     public function users(): BelongsToMany

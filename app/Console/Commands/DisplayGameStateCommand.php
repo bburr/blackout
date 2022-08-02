@@ -18,9 +18,14 @@ class DisplayGameStateCommand extends Command
         $gameState = new GameState($game, null);
         $currentRound = $gameState->getCurrentRound();
 
+        $bettingPlayer = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToBet());
+        $nextPlayer = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToPlay());
+
         $headers = ['Game State', 'Value'];
         $rows = [
             ['Dealer', $gameState->getDealer()->getUser()->getKey()],
+            ['Betting Player', $bettingPlayer ? $bettingPlayer->getUser()->getKey() : ''],
+            ['Next Player', $nextPlayer ? $nextPlayer->getUser()->getKey() : ''],
             ['Round Number', $currentRound->getRoundNumber()],
             ['Num Cards', $currentRound->getNumCards()],
             ['Num Cards Asc?', $currentRound->isNumCardsAscending()],
@@ -29,19 +34,28 @@ class DisplayGameStateCommand extends Command
 
         $this->table($headers, $rows);
 
-
         $headers = [];
         $rows = [];
 
-        $playerIndex = 0;
-        foreach ($gameState->getPlayersInDealingOrder() as $player) {
-            $headers[] = $player->getUser()->getKey();
+        $bets = $gameState->getCurrentRound()->getBets();
+        $plays = $gameState->getCurrentRound()->getPlays();
 
-            $i = 0;
+        $playerIndex = 0;
+        foreach ($gameState->getPlayers() as $player) {
+            $headers[] = $player->getUser()->getKey();
+            $rows[0][$playerIndex] = 'Bet: ' . ($bets[$playerIndex] ?? 'N/A');
+            $rows[1][$playerIndex] = 'Played: ' . ($plays[$playerIndex] ?? 'N/A');
+
+            $i = 2;
+
             foreach ($player->getHand() as $card) {
                 $rows[$i][$playerIndex] = $card;
 
                 $i++;
+            }
+
+            if (isset($plays[$playerIndex])) {
+                $rows[$i][$playerIndex] = '';
             }
 
             $playerIndex++;

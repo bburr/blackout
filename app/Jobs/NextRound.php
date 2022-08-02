@@ -31,6 +31,7 @@ class NextRound
             $numCards = $currentRound->getNumCards() - 1;
 
             if ($numCards < $gameSettings->getEndingNumCards()) {
+                // todo exception
                 throw new \LogicException('Game is over, cannot advance past this round');
             }
         }

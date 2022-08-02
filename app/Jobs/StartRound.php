@@ -16,7 +16,15 @@ class StartRound
 
     public function handle()
     {
-        $this->gameState->setCurrentRound(new RoundState($this->roundNumber, $this->numCards, $this->isNumCardsAscending));
+        $playerIndexAfterDealer = $this->gameState->getPlayerIndexAfter($this->gameState->getDealerIndex());
+
+        $this->gameState->setCurrentRound(new RoundState(
+            $this->roundNumber,
+            $this->numCards,
+            $this->isNumCardsAscending,
+            $playerIndexAfterDealer,
+            $playerIndexAfterDealer
+        ));
 
         $this->gameState->setShoe(new CardShoeState($this->gameState->getGameSettings()->getNumDecks()));
 
