@@ -2,11 +2,12 @@
 
 namespace App\State;
 
+use App\Jobs\DetermineDealer;
+use App\Jobs\StartRound;
 use App\Models\Game;
-use App\Models\User;
-use App\State\Actions\DetermineDealer;
 use Generator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 
 class GameState extends AbstractState
@@ -40,7 +41,12 @@ class GameState extends AbstractState
             : $this->initGame();
     }
 
-    protected function advanceDealerIndex()
+    public function addPreviousRound(RoundScoreState $roundScoreState): void
+    {
+        $this->previousRounds->add($roundScoreState);
+    }
+
+    public function advanceDealerIndex(): void
     {
         $this->dealerIndex++;
 
@@ -64,6 +70,16 @@ class GameState extends AbstractState
         return $this->currentRound;
     }
 
+    public function getDealer(): PlayerState
+    {
+        return $this->players[$this->dealerIndex];
+    }
+
+    public function getGameSettings(): GameSettings
+    {
+        return $this->gameSettings;
+    }
+
     /**
      * @return Generator<PlayerState>
      */
@@ -84,9 +100,9 @@ class GameState extends AbstractState
             $this->players->add(new PlayerState($user));
         }
 
-        $this->dealerIndex = (new DetermineDealer())($this->players->keys()->toArray());
+        $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
 
-        $this->startRound(1, $this->gameSettings->getStartingNumCards(), true);
+        Bus::dispatch(new StartRound($this, 1, $this->gameSettings->getStartingNumCards(), true));
     }
 
     public function jsonSerialize()
@@ -118,34 +134,6 @@ class GameState extends AbstractState
         // todo load previousRounds
     }
 
-    public function nextRound()
-    {
-        // todo move method to action(s)?
-        $currentRound = $this->currentRound;
-
-        // todo score current round and save to $previousRounds
-        $this->previousRounds->add(new RoundScoreState());
-
-        if ($currentRound->isNumCardsAscending()) {
-            $numCards = $currentRound->getNumCards() + 1;
-
-            if ($numCards === $this->gameSettings->getMaxNumCards()) {
-                $isNumCardsAscending = false;
-            }
-        }
-        else {
-            $numCards = $currentRound->getNumCards() - 1;
-
-            if ($numCards < $this->gameSettings->getEndingNumCards()) {
-                throw new \LogicException('Game is over, cannot advance past this round');
-            }
-        }
-
-        $this->advanceDealerIndex();
-
-        $this->startRound($currentRound->getRoundNumber() + 1, $numCards, $isNumCardsAscending ?? $currentRound->isNumCardsAscending());
-    }
-
     public function save()
     {
         $this->cachePut(self::GAME_STATE_CACHE_KEY, $this);
@@ -155,11 +143,13 @@ class GameState extends AbstractState
         $this->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRounds);
     }
 
-    protected function startRound(int $roundNumber, int $numCards, bool $isNumCardsAscending)
+    public function setCurrentRound(RoundState $roundState)
     {
-        // todo move method to action?
-        $this->currentRound = new RoundState($roundNumber, $numCards, $isNumCardsAscending);
+        $this->currentRound = $roundState;
+    }
 
-        $this->shoe = new CardShoeState($this->gameSettings->getNumDecks());
+    public function setShoe(CardShoeState $cardShoeState)
+    {
+        $this->shoe = $cardShoeState;
     }
 }

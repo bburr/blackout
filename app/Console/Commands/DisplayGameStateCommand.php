@@ -20,7 +20,7 @@ class DisplayGameStateCommand extends Command
 
         $headers = ['Game State', 'Value'];
         $rows = [
-//            ['Dealer', $gameState->getDealer()],
+            ['Dealer', $gameState->getDealer()->getUser()->getKey()],
             ['Round Number', $currentRound->getRoundNumber()],
             ['Num Cards', $currentRound->getNumCards()],
             ['Num Cards Asc?', $currentRound->isNumCardsAscending()],

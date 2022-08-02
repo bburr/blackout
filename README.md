@@ -6,4 +6,4 @@
 
 (In Artisan)
 * `state:display {gameId}`
-* `action:deal-cards {gameId} {numPerPlayer}`
+* `action:deal-cards {gameId}`

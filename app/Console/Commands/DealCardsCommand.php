@@ -2,14 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\DealForRound;
 use App\Models\Game;
-use App\State\Actions\DealCard;
-use App\State\Actions\RevealTrumpCard;
 use App\State\GameState;
+use Illuminate\Support\Facades\Bus;
 
 class DealCardsCommand extends Command
 {
-    protected $signature = 'action:deal-cards {gameId} {numPerPlayer}';
+    protected $signature = 'action:deal-cards {gameId}';
 
     public function handle()
     {
@@ -19,14 +19,7 @@ class DealCardsCommand extends Command
 
         $gameState = new GameState($game, null);
 
-        for ($i = 0; $i < $this->argument('numPerPlayer'); $i++) {
-            foreach ($gameState->getPlayersInDealingOrder() as $player) {
-                // todo convert to job?
-                (new DealCard())($player, $gameState->getCardShoeState());
-            }
-        }
-
-        (new RevealTrumpCard())($gameState->getCurrentRound(), $gameState->getCardShoeState());
+        Bus::dispatch(new DealForRound($gameState));
 
         $gameState->save();
     }
