@@ -2,6 +2,7 @@
 
 namespace App\State;
 
+use App\Exceptions\CardShoeIsEmptyException;
 use App\State\Collections\CardCollection;
 
 /**
@@ -34,10 +35,19 @@ class CardShoeState extends AbstractState
         $this->cards = $cards->shuffle();
     }
 
+    /**
+     * @throws CardShoeIsEmptyException
+     */
     public function dealCardOut(): CardState
     {
-        // todo logic to ensure we have enough cards beforehand?
-        return $this->cards->shift();
+        /** @var CardState|null $card */
+        $card = $this->cards->shift();
+
+        if ($card === null) {
+            throw new CardShoeIsEmptyException();
+        }
+
+        return $card;
     }
 
     /**

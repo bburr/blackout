@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\MakeBetForNextPlayer;
 use App\Models\Game;
 use App\Models\Lobby;
 use App\Models\User;
 use App\State\GameSettings;
 use App\State\GameState;
+use Illuminate\Support\Facades\Bus;
 
 class QuickStartGameCommand extends Command
 {
@@ -40,7 +42,7 @@ class QuickStartGameCommand extends Command
         $gameState = (new GameState($game, new GameSettings()));
 
         for ($i = 0; $i < count($names); $i++) {
-            $gameState->makeBetForNextPlayer(1);
+            Bus::dispatch(new MakeBetForNextPlayer($gameState, 1));
         }
 
         $gameState->save();

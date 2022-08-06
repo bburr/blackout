@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Jobs;
+namespace Tests\Unit\Jobs;
 
 use App\Jobs\DetermineDealer;
 use Tests\TestCase;

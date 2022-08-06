@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\GameIsCompleteException;
 use App\State\GameState;
 use App\State\RoundScoreState;
 use Illuminate\Support\Facades\Bus;
@@ -12,6 +13,9 @@ class NextRound
     {
     }
 
+    /**
+     * @throws GameIsCompleteException
+     */
     public function handle(): void
     {
         $currentRound = $this->gameState->getCurrentRound();
@@ -31,8 +35,7 @@ class NextRound
             $numCards = $currentRound->getNumCards() - 1;
 
             if ($numCards < $gameSettings->getEndingNumCards()) {
-                // todo exception
-                throw new \LogicException('Game is over, cannot advance past this round');
+                throw new GameIsCompleteException();
             }
         }
 

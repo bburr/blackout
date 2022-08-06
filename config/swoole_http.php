@@ -39,8 +39,8 @@ return [
             // Enable coroutine send
             'send_yield' => true,
             // You must add --enable-openssl while compiling Swoole
-            'ssl_cert_file' => null,
-            'ssl_key_file' => null,
+            'ssl_cert_file' => env('SWOOLE_HTTP_SSL_CERT_PATH'),
+            'ssl_key_file' => env('SWOOLE_HTTP_SSL_CERT_KEY_PATH'),
         ],
     ],
 

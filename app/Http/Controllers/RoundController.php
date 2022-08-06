@@ -8,6 +8,7 @@ use App\Http\Requests\Round\PlayCard;
 use App\Http\Requests\Round\PlayCardAsUser;
 use App\Http\Requests\Round\StartNextRound;
 use App\Http\Requests\Round\StartNextRoundAsUser;
+use App\Jobs\MakeBetForNextPlayer;
 use App\Jobs\NextRound;
 use App\Models\Game;
 use App\State\CardState;
@@ -33,7 +34,7 @@ class RoundController extends Controller
         abort_if($bettingPlayer === null, Response::HTTP_BAD_REQUEST, 'It is not the time to bet');
         abort_unless($bettingPlayer->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to bet');
 
-        $gameState->makeBetForNextPlayer($request->get('bet'));
+        Bus::dispatch(new MakeBetForNextPlayer($gameState, $request->get('bet')));
 
         $gameState->save();
     }
@@ -59,7 +60,7 @@ class RoundController extends Controller
         abort_if($player === null, Response::HTTP_BAD_REQUEST, 'It is not the time to play a card');
         abort_unless($player->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to play');
 
-        $gameState->makePlayForNextPlayer(new CardState($request->get('card_suite'), $request->get('card_value')));
+        $gameState->makePlayForNextPlayer(new CardState($request->get('card_suit'), $request->get('card_value')));
 
         $gameState->save();
     }

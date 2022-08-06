@@ -4,7 +4,6 @@ namespace App\State;
 
 use App\Models\User;
 use App\State\Collections\CardCollection;
-use Illuminate\Support\Collection;
 
 /**
  * @phpstan-consistent-constructor
@@ -31,7 +30,7 @@ class PlayerState extends AbstractState
     /**
      * @return CardCollection<int, CardState>
      */
-    public function getHand(): Collection
+    public function getHand(): CardCollection
     {
         return $this->hand;
     }

@@ -10,7 +10,7 @@ class PlayCard extends Request
     {
         return [
             'game_id' => 'required',
-            'card_suite' => 'required',
+            'card_suit' => 'required',
             'card_value' => 'required',
         ];
     }

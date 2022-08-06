@@ -1,12 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Models;
+namespace Tests\Unit\Models;
 
 use App\Models\Lobby;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class LobbyTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function testHasInviteCode(): void
     {
         /** @var Lobby $lobby */

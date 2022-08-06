@@ -5,18 +5,20 @@ namespace App\State;
 use App\Jobs\DetermineDealer;
 use App\Jobs\StartRound;
 use App\Models\Game;
+use App\State\Handlers\GameStateCacheHandlerInterface;
 use Generator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Cache;
 
 class GameState extends AbstractState
 {
-    protected const CARD_SHOE_CACHE_KEY = 'game-shoe-';
-    protected const CURRENT_ROUND_CACHE_KEY = 'game-current-round-';
-    protected const GAME_STATE_CACHE_KEY = 'game-state-';
-    protected const PLAYERS_CACHE_KEY = 'game-players-';
-    protected const PREVIOUS_ROUNDS_CACHE_KEY = 'game-previous-rounds-';
+    const CARD_SHOE_CACHE_KEY = 'game-shoe-';
+    const CURRENT_ROUND_CACHE_KEY = 'game-current-round-';
+    const GAME_STATE_CACHE_KEY = 'game-state-';
+    const PLAYERS_CACHE_KEY = 'game-players-';
+    const PREVIOUS_ROUNDS_CACHE_KEY = 'game-previous-rounds-';
+
+    protected GameStateCacheHandlerInterface $cacheHandler;
 
     protected RoundState $currentRound;
 
@@ -35,8 +37,10 @@ class GameState extends AbstractState
         $this->players = new Collection();
         $this->previousRounds = new Collection();
 
+        $this->cacheHandler = app(GameStateCacheHandlerInterface::class, ['gameKey' => $this->game->getKey()]);
+
         // check for existing game
-        Cache::has($this->cacheKey(self::GAME_STATE_CACHE_KEY))
+        $this->cacheHandler->cacheHas(self::GAME_STATE_CACHE_KEY)
             ? $this->loadGame()
             : $this->initGame();
     }
@@ -48,22 +52,9 @@ class GameState extends AbstractState
 
     public function advanceBettingPlayerIndex(): void
     {
-        // todo combine logic with player index logic
         $bettingPlayerIndex = $this->getCurrentRound()->getNextPlayerIndexToBet();
 
-        if ($bettingPlayerIndex === $this->dealerIndex) {
-            $bettingPlayerIndex = -1;
-        }
-
-        if ($bettingPlayerIndex >= 0) {
-            $bettingPlayerIndex++;
-        }
-
-        if ($bettingPlayerIndex >= $this->players->count()) {
-            $bettingPlayerIndex = 0;
-        }
-
-        $this->getCurrentRound()->setNextPlayerIndexToBet($bettingPlayerIndex);
+        $this->getCurrentRound()->setNextPlayerIndexToBet($this->advancePlayerIndexUntilDealer($bettingPlayerIndex));
     }
 
     public function advanceDealerIndex(): void
@@ -75,6 +66,11 @@ class GameState extends AbstractState
     {
         $playerIndex = $this->getCurrentRound()->getNextPlayerIndexToPlay();
 
+        $this->getCurrentRound()->setNextPlayerIndexToPlay($this->advancePlayerIndexUntilDealer($playerIndex));
+    }
+
+    protected function advancePlayerIndexUntilDealer(int $playerIndex): int
+    {
         if ($playerIndex === $this->dealerIndex) {
             $playerIndex = -1;
         }
@@ -87,12 +83,7 @@ class GameState extends AbstractState
             $playerIndex = 0;
         }
 
-        $this->getCurrentRound()->setNextPlayerIndexToPlay($playerIndex);
-    }
-
-    protected function cacheKey(string $cacheKey): string
-    {
-        return $cacheKey . $this->game->getKey();
+        return $playerIndex;
     }
 
     public function getCardShoeState(): CardShoeState
@@ -177,36 +168,31 @@ class GameState extends AbstractState
         return [
             'game_id' => $this->game->getKey(),
             'dealer_index' => $this->getDealerIndex(),
-            'settings' => $this->getGameSettings(),
+            'settings' => $this->getGameSettings()->jsonSerialize(),
         ];
     }
 
     protected function loadGame(): void
     {
-        $gameStateData = $this->cacheGet(self::GAME_STATE_CACHE_KEY);
+        $gameStateData = $this->cacheHandler->cacheGet(self::GAME_STATE_CACHE_KEY);
         $this->dealerIndex = $gameStateData['dealer_index'];
         // todo load settings
         $this->gameSettings = (new GameSettings());
 
-        foreach ($this->cacheGet(self::PLAYERS_CACHE_KEY) as $playerData) {
+        foreach ($this->cacheHandler->cacheGet(self::PLAYERS_CACHE_KEY) as $playerData) {
             $this->players->add(PlayerState::loadFromSaveData($playerData));
         }
 
-        $cardShoeData = $this->cacheGet(self::CARD_SHOE_CACHE_KEY);
+        $cardShoeData = $this->cacheHandler->cacheGet(self::CARD_SHOE_CACHE_KEY);
         $this->shoe = CardShoeState::loadFromSaveData($cardShoeData);
 
-        $currentRoundData = $this->cacheGet(self::CURRENT_ROUND_CACHE_KEY);
+        $currentRoundData = $this->cacheHandler->cacheGet(self::CURRENT_ROUND_CACHE_KEY);
         $this->currentRound = RoundState::loadFromSaveData($currentRoundData);
 
         // todo load previousRounds
     }
 
-    public function makeBetForNextPlayer(int $bet): void
-    {
-        $this->getCurrentRound()->makeBetForNextPlayer($bet);
-        $this->advanceBettingPlayerIndex();
-    }
-
+    // todo move to job
     public function makePlayForNextPlayer(CardState $cardState): void
     {
         /** @var PlayerState $player */
@@ -227,11 +213,11 @@ class GameState extends AbstractState
 
     public function save(): void
     {
-        $this->cachePut(self::GAME_STATE_CACHE_KEY, $this);
-        $this->cachePut(self::PLAYERS_CACHE_KEY, $this->players);
-        $this->cachePut(self::CARD_SHOE_CACHE_KEY, $this->shoe);
-        $this->cachePut(self::CURRENT_ROUND_CACHE_KEY, $this->currentRound);
-        $this->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRounds);
+        $this->cacheHandler->cachePut(self::GAME_STATE_CACHE_KEY, $this);
+        $this->cacheHandler->cachePut(self::PLAYERS_CACHE_KEY, $this->players);
+        $this->cacheHandler->cachePut(self::CARD_SHOE_CACHE_KEY, $this->shoe);
+        $this->cacheHandler->cachePut(self::CURRENT_ROUND_CACHE_KEY, $this->currentRound);
+        $this->cacheHandler->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRounds);
     }
 
     public function setCurrentRound(RoundState $roundState): void

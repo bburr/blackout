@@ -2,7 +2,16 @@
 
 namespace App\State;
 
-/** @phpstan-consistent-constructor  */
+use App\Exceptions\InvalidBetAmountException;
+use App\State\Collections\CardCollection;
+
+/**
+ * @phpstan-consistent-constructor
+ * @phpstan-import-type SerializedCardState from CardState
+ * @phpstan-import-type SerializedCardCollection from CardCollection
+ * @phpstan-type SerializedRoundConfig array{round_number: int, num_cards: int, is_num_cards_ascending: bool, next_player_index_to_bet: int, next_player_index_to_play: int}
+ * @phpstan-type SerializedRoundState array{config: SerializedRoundConfig, trump_card: SerializedCardState|null, bets: int[], plays: SerializedCardCollection}
+ */
 class RoundState extends AbstractState
 {
     /**
@@ -10,15 +19,13 @@ class RoundState extends AbstractState
      */
     protected array $bets = [];
 
-    /**
-     * @var array<int, CardState>
-     */
-    protected array $plays = [];
+    protected CardCollection $plays;
 
     protected ?CardState $trumpCard = null;
 
     public function __construct(protected int $roundNumber, protected int $numCards, protected bool $isNumCardsAscending, protected int $nextPlayerIndexToBet, protected int $nextPlayerIndexToPlay)
     {
+        $this->plays = new CardCollection();
     }
 
     /**
@@ -44,10 +51,7 @@ class RoundState extends AbstractState
         return $this->numCards;
     }
 
-    /**
-     * @return CardState[]
-     */
-    public function getPlays(): array
+    public function getPlays(): CardCollection
     {
         return $this->plays;
     }
@@ -78,29 +82,38 @@ class RoundState extends AbstractState
     }
 
     /**
-     * @return array<string, mixed>
+     * @phpstan-return SerializedRoundState
      */
     public function jsonSerialize(): array
     {
         return [
-            'round_number' => $this->roundNumber,
-            'num_cards' => $this->numCards,
-            'trump_card' => $this->trumpCard,
-            'is_num_cards_ascending' => $this->isNumCardsAscending,
-            'next_player_index_to_bet' => $this->nextPlayerIndexToBet,
-            'next_player_index_to_play' => $this->nextPlayerIndexToPlay,
+            'config' => [
+                'round_number' => $this->roundNumber,
+                'num_cards' => $this->numCards,
+                'is_num_cards_ascending' => $this->isNumCardsAscending,
+                'next_player_index_to_bet' => $this->nextPlayerIndexToBet,
+                'next_player_index_to_play' => $this->nextPlayerIndexToPlay,
+            ],
+            'trump_card' => $this->trumpCard?->jsonSerialize(),
             'bets' => $this->bets,
-            'plays' => $this->plays,
+            'plays' => $this->plays->jsonSerialize(),
         ];
     }
 
     /**
-     * @param array<string, mixed> $roundData
+     * @param array $roundData
+     * @phpstan-param SerializedRoundState $roundData
      * @return static
      */
     public static function loadFromSaveData(array $roundData): static
     {
-        $round = (new static($roundData['round_number'], $roundData['num_cards'], $roundData['is_num_cards_ascending'], $roundData['next_player_index_to_bet'], $roundData['next_player_index_to_play']));
+        $round = (new static(
+            $roundData['config']['round_number'],
+            $roundData['config']['num_cards'],
+            $roundData['config']['is_num_cards_ascending'],
+            $roundData['config']['next_player_index_to_bet'],
+            $roundData['config']['next_player_index_to_play']
+        ));
 
         if (isset($roundData['trump_card'])) {
             $round->setTrumpCard(new CardState($roundData['trump_card']['suit'], $roundData['trump_card']['value']));
@@ -108,10 +121,10 @@ class RoundState extends AbstractState
 
         $round->setBets($roundData['bets']);
 
-        $plays = [];
+        $plays = new CardCollection();
 
         foreach ($roundData['plays'] as $index => $card) {
-            $plays[$index] = new CardState($card['suit'], $card['value']);
+            $plays->offsetSet($index, new CardState($card['suit'], $card['value']));
         }
 
         $round->setPlays($plays);
@@ -119,11 +132,13 @@ class RoundState extends AbstractState
         return $round;
     }
 
+    /**
+     * @throws InvalidBetAmountException
+     */
     public function makeBetForNextPlayer(int $bet): void
     {
         if ($bet < 0 || $bet > $this->numCards) {
-            // todo exception
-            throw new \LogicException('Invalid bet amount');
+            throw new InvalidBetAmountException();
         }
 
         $this->bets[$this->nextPlayerIndexToBet] = $bet;
@@ -158,11 +173,7 @@ class RoundState extends AbstractState
         $this->nextPlayerIndexToPlay = $index;
     }
 
-    /**
-     * @param CardState[] $plays
-     * @return void
-     */
-    public function setPlays(array $plays): void
+    public function setPlays(CardCollection $plays): void
     {
         $this->plays = $plays;
     }
