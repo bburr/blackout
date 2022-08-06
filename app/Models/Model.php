@@ -25,6 +25,6 @@ class Model extends EloquentModel
      */
     public function getKey(): string
     {
-        return parent::getKey();
+        return (string) parent::getKey();
     }
 }

@@ -13,6 +13,7 @@ class UserController extends Controller
     {
         $user = $this->newUser($request->get('name'));
 
+        Session::migrate(true);
         Session::put(User::CACHE_KEY_USER_ID, $user->getKey());
 
         return response()->json($user);
