@@ -12,7 +12,7 @@ class QuickStartGameCommand extends Command
 {
     protected $signature = 'game:quickstart';
 
-    public function handle()
+    public function handle(): void
     {
         $names = ['Alice', 'Bob', 'Charlie'];
 

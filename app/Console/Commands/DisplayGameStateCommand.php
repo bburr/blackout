@@ -9,11 +9,15 @@ class DisplayGameStateCommand extends Command
 {
     protected $signature = 'state:display {gameId}';
 
-    public function handle()
+    public function handle(): void
     {
         $gameId = $this->argument('gameId');
 
         $game = Game::find($gameId);
+
+        if ($game === null) {
+            throw new \LogicException('Game not found');
+        }
 
         $gameState = new GameState($game, null);
         $currentRound = $gameState->getCurrentRound();

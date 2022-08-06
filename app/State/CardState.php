@@ -2,6 +2,9 @@
 
 namespace App\State;
 
+/**
+ * @phpstan-type SerializedCardState array{suit: string, value: int}
+ */
 class CardState extends AbstractState
 {
     public function __construct(protected string $suitKey, protected int $valueKey)
@@ -13,7 +16,11 @@ class CardState extends AbstractState
         return static::listValues()[$this->valueKey] . ' of ' . static::listSuits()[$this->suitKey];
     }
 
-    public function jsonSerialize()
+    /**
+     * @phpstan-return SerializedCardState
+     * @return array
+     */
+    public function jsonSerialize(): array
     {
         return [
             'suit' => $this->suitKey,
@@ -21,6 +28,9 @@ class CardState extends AbstractState
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function listSuits(): array
     {
         return [
@@ -31,6 +41,9 @@ class CardState extends AbstractState
         ];
     }
 
+    /**
+     * @return string[]
+     */
     public static function listValues(): array
     {
         return [

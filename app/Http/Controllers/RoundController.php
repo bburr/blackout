@@ -17,8 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoundController extends Controller
 {
-    public function performBet(PerformBet $request)
+    public function performBet(PerformBet $request): void
     {
+        /** @var Game|null $game */
         $game = Game::find($request->get('game_id'));
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
@@ -37,13 +38,14 @@ class RoundController extends Controller
         $gameState->save();
     }
 
-    public function performBetAsUser(PerformBetAsUser $request)
+    public function performBetAsUser(PerformBetAsUser $request): void
     {
         $this->performBet($request);
     }
 
-    public function playCard(PlayCard $request)
+    public function playCard(PlayCard $request): void
     {
+        /** @var Game|null $game */
         $game = Game::find($request->get('game_id'));
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
@@ -62,14 +64,14 @@ class RoundController extends Controller
         $gameState->save();
     }
 
-    public function playCardAsUser(PlayCardAsUser $request)
+    public function playCardAsUser(PlayCardAsUser $request): void
     {
         $this->playCard($request);
     }
 
-    public function startNextRound(StartNextRound $request)
+    public function startNextRound(StartNextRound $request): void
     {
-        /** @var Game $game */
+        /** @var Game|null $game */
         $game = Game::find($request->get('game_id'));
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
@@ -84,7 +86,7 @@ class RoundController extends Controller
         Bus::dispatch(new NextRound($gameState));
     }
 
-    public function startNextRoundAsUser(StartNextRoundAsUser $request)
+    public function startNextRoundAsUser(StartNextRoundAsUser $request): void
     {
         $this->startNextRound($request);
     }

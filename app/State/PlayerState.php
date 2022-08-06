@@ -3,23 +3,34 @@
 namespace App\State;
 
 use App\Models\User;
+use App\State\Collections\CardCollection;
 use Illuminate\Support\Collection;
 
+/**
+ * @phpstan-consistent-constructor
+ * @phpstan-import-type SerializedCardCollection from CardCollection
+ * @phpstan-type SerializedPlayerState array{user_id: string, hand: SerializedCardCollection}
+ */
 class PlayerState extends AbstractState
 {
-    /** @var Collection<CardState> */
-    protected Collection $hand;
+    /**
+     * @var CardCollection<int, CardState>
+     */
+    protected CardCollection $hand;
 
     public function __construct(protected User $user)
     {
-        $this->hand = collect();
+        $this->hand = new CardCollection();
     }
 
-    public function addToHand(CardState $cardState)
+    public function addToHand(CardState $cardState): void
     {
         $this->hand->add($cardState);
     }
 
+    /**
+     * @return CardCollection<int, CardState>
+     */
     public function getHand(): Collection
     {
         return $this->hand;
@@ -30,14 +41,22 @@ class PlayerState extends AbstractState
         return $this->user;
     }
 
-    public function jsonSerialize()
+    /**
+     * @phpstan-return SerializedPlayerState
+     */
+    public function jsonSerialize(): array
     {
         return [
             'user_id' => $this->user->getKey(),
-            'hand' => $this->hand,
+            'hand' => $this->hand->jsonSerialize(),
         ];
     }
 
+    /**
+     * @param array $playerData
+     * @phpstan-param SerializedPlayerState $playerData
+     * @return static
+     */
     public static function loadFromSaveData(array $playerData): static
     {
         $user = (new User)->setAttribute('uuid', $playerData['user_id']);
@@ -47,6 +66,11 @@ class PlayerState extends AbstractState
         return $player;
     }
 
+    /**
+     * @param array $handData
+     * @phpstan-param SerializedCardCollection $handData
+     * @return void
+     */
     public function setHandFromArray(array $handData): void
     {
         foreach ($handData as $cardData) {

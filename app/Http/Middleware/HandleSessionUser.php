@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HandleSessionUser
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         if (! Session::has(User::CACHE_KEY_USER_ID)) {
             return abort(Response::HTTP_UNAUTHORIZED);

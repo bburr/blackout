@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LobbyController extends Controller
 {
-    public function addUserToLobby(AddUserToLobby $request)
+    public function addUserToLobby(AddUserToLobby $request): void
     {
         if ($request->has('invite_code')) {
             $lobby = Lobby::query()
@@ -24,6 +24,7 @@ class LobbyController extends Controller
             $lobby = Lobby::find($request->get('lobby_id'));
         }
 
+        /** @var Lobby $lobby */
         $lobby->users()->attach($request->get('user_id'));
     }
 
@@ -42,7 +43,7 @@ class LobbyController extends Controller
     public function joinLobby(JoinLobby $request): void
     {
         // look up lobby by invite_code
-        /** @var Lobby $lobby */
+        /** @var Lobby|null $lobby */
         $lobby = Lobby::query()
             ->with(['users'])
             ->where('invite_code', '=', $request->get('invite_code'))

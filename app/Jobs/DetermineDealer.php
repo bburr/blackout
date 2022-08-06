@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Bus;
 
 class DetermineDealer
 {
+    /**
+     * @param int[] $playerIndexes
+     */
     public function __construct(protected array $playerIndexes)
     {
     }

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GameController extends Controller
 {
-    public function startGame(StartGame $request)
+    public function startGame(StartGame $request): Response
     {
         // check for current lobby key
         abort_unless(Session::has(Lobby::CACHE_KEY_CURRENT_LOBBY_ID), Response::HTTP_BAD_REQUEST, 'No lobby found');

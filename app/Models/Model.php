@@ -19,4 +19,12 @@ class Model extends EloquentModel
             $model->setAttribute($model->getKeyName(), Str::uuid());
         });
     }
+
+    /**
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return parent::getKey();
+    }
 }

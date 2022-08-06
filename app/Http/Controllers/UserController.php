@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\User\CreateUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    public function createUser(CreateUser $request)
+    public function createUser(CreateUser $request): Response
     {
         $user = $this->newUser($request->get('name'));
 
@@ -17,7 +18,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function createOtherUser(CreateUser $request)
+    public function createOtherUser(CreateUser $request): Response
     {
         $user = $this->newUser($request->get('name'));
 

@@ -24,16 +24,16 @@ class GameState extends AbstractState
 
     protected CardShoeState $shoe;
 
-    /** @var Collection<PlayerState> */
+    /** @var Collection<int, PlayerState> */
     protected Collection $players;
 
-    /** @var Collection<RoundScoreState>  */
+    /** @var Collection<int, RoundScoreState>  */
     protected Collection $previousRounds;
 
     public function __construct(protected Game $game, protected ?GameSettings $gameSettings)
     {
-        $this->players = collect();
-        $this->previousRounds = collect();
+        $this->players = new Collection();
+        $this->previousRounds = new Collection();
 
         // check for existing game
         Cache::has($this->cacheKey(self::GAME_STATE_CACHE_KEY))
@@ -107,6 +107,7 @@ class GameState extends AbstractState
 
     public function getDealer(): PlayerState
     {
+        /** @phpstan-ignore-next-line */
         return $this->players[$this->dealerIndex];
     }
 
@@ -117,7 +118,7 @@ class GameState extends AbstractState
 
     public function getGameSettings(): GameSettings
     {
-        return $this->gameSettings;
+        return $this->gameSettings ?? $this->gameSettings = new GameSettings();
     }
 
     public function getPlayerAtIndex(int $index): ?PlayerState
@@ -136,6 +137,9 @@ class GameState extends AbstractState
         return $index;
     }
 
+    /**
+     * @return Collection<int, PlayerState>
+     */
     public function getPlayers(): Collection
     {
         return $this->players;
@@ -147,10 +151,12 @@ class GameState extends AbstractState
     public function getPlayersInDealingOrder(): Generator
     {
         for ($i = $this->dealerIndex + 1; $i < $this->players->count(); $i++) {
+            /** @phpstan-ignore-next-line  */
             yield $this->players->get($i);
         }
 
         for ($i = 0; $i <= $this->dealerIndex; $i++) {
+            /** @phpstan-ignore-next-line  */
             yield $this->players->get($i);
         }
     }
@@ -163,15 +169,15 @@ class GameState extends AbstractState
 
         $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
 
-        Bus::dispatch(new StartRound($this, 1, $this->gameSettings->getStartingNumCards(), true));
+        Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumCards(), true));
     }
 
     public function jsonSerialize()
     {
         return [
             'game_id' => $this->game->getKey(),
-            'dealer_index' => $this->dealerIndex,
-            'settings' => $this->gameSettings,
+            'dealer_index' => $this->getDealerIndex(),
+            'settings' => $this->getGameSettings(),
         ];
     }
 
@@ -195,13 +201,13 @@ class GameState extends AbstractState
         // todo load previousRounds
     }
 
-    public function makeBetForNextPlayer(int $bet)
+    public function makeBetForNextPlayer(int $bet): void
     {
         $this->getCurrentRound()->makeBetForNextPlayer($bet);
         $this->advanceBettingPlayerIndex();
     }
 
-    public function makePlayForNextPlayer(CardState $cardState)
+    public function makePlayForNextPlayer(CardState $cardState): void
     {
         /** @var PlayerState $player */
         $player = $this->getPlayerAtIndex($this->getCurrentRound()->getNextPlayerIndexToPlay());

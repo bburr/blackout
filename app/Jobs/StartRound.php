@@ -14,7 +14,7 @@ class StartRound
     {
     }
 
-    public function handle()
+    public function handle(): void
     {
         $playerIndexAfterDealer = $this->gameState->getPlayerIndexAfter($this->gameState->getDealerIndex());
 

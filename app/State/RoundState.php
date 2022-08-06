@@ -2,10 +2,17 @@
 
 namespace App\State;
 
+/** @phpstan-consistent-constructor  */
 class RoundState extends AbstractState
 {
+    /**
+     * @var array<int, int>
+     */
     protected array $bets = [];
 
+    /**
+     * @var array<int, CardState>
+     */
     protected array $plays = [];
 
     protected ?CardState $trumpCard = null;
@@ -14,6 +21,9 @@ class RoundState extends AbstractState
     {
     }
 
+    /**
+     * @return int[]
+     */
     public function getBets(): array
     {
         return $this->bets;
@@ -34,6 +44,9 @@ class RoundState extends AbstractState
         return $this->numCards;
     }
 
+    /**
+     * @return CardState[]
+     */
     public function getPlays(): array
     {
         return $this->plays;
@@ -64,7 +77,10 @@ class RoundState extends AbstractState
         return $this->nextPlayerIndexToPlay < 0;
     }
 
-    public function jsonSerialize()
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
     {
         return [
             'round_number' => $this->roundNumber,
@@ -78,9 +94,13 @@ class RoundState extends AbstractState
         ];
     }
 
+    /**
+     * @param array<string, mixed> $roundData
+     * @return static
+     */
     public static function loadFromSaveData(array $roundData): static
     {
-        $round = (new RoundState($roundData['round_number'], $roundData['num_cards'], $roundData['is_num_cards_ascending'], $roundData['next_player_index_to_bet'], $roundData['next_player_index_to_play']));
+        $round = (new static($roundData['round_number'], $roundData['num_cards'], $roundData['is_num_cards_ascending'], $roundData['next_player_index_to_bet'], $roundData['next_player_index_to_play']));
 
         if (isset($roundData['trump_card'])) {
             $round->setTrumpCard(new CardState($roundData['trump_card']['suit'], $roundData['trump_card']['value']));
@@ -114,6 +134,10 @@ class RoundState extends AbstractState
         $this->plays[$this->nextPlayerIndexToPlay] = $cardState;
     }
 
+    /**
+     * @param int[] $bets
+     * @return void
+     */
     public function setBets(array $bets): void
     {
         $this->bets = $bets;
@@ -134,6 +158,10 @@ class RoundState extends AbstractState
         $this->nextPlayerIndexToPlay = $index;
     }
 
+    /**
+     * @param CardState[] $plays
+     * @return void
+     */
     public function setPlays(array $plays): void
     {
         $this->plays = $plays;
@@ -142,5 +170,11 @@ class RoundState extends AbstractState
     public function setTrumpCard(CardState $cardState): void
     {
         $this->trumpCard = $cardState;
+    }
+
+    public function shouldDrawTrumpCard(): bool
+    {
+        // todo check gameSettings?
+        return true;
     }
 }

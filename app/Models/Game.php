@@ -17,16 +17,25 @@ class Game extends Model
         return $this->getAttribute('lobby');
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     public function getUsers(): Collection
     {
         return $this->getAttribute('users');
     }
 
+    /**
+     * @return BelongsTo<Lobby, Game>
+     */
     public function lobby(): BelongsTo
     {
         return $this->belongsTo(Lobby::class);
     }
 
+    /**
+     * @return BelongsToMany<User>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);

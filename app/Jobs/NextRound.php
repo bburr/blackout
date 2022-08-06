@@ -12,7 +12,7 @@ class NextRound
     {
     }
 
-    public function handle()
+    public function handle(): void
     {
         $currentRound = $this->gameState->getCurrentRound();
         $gameSettings = $this->gameState->getGameSettings();

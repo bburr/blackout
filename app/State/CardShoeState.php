@@ -2,12 +2,18 @@
 
 namespace App\State;
 
-use Illuminate\Support\Collection;
+use App\State\Collections\CardCollection;
 
+/**
+ * @phpstan-consistent-constructor
+ * @phpstan-import-type SerializedCardState from CardState
+ * @phpstan-import-type SerializedCardCollection from CardCollection
+ * @phpstan-type SerializedCardShoeState array{cards: SerializedCardCollection}
+ */
 class CardShoeState extends AbstractState
 {
-    /** @var Collection<CardState> */
-    protected Collection $cards;
+    /** @var CardCollection<int, CardState> */
+    protected CardCollection $cards;
 
     public function __construct(?int $numDecks = 1)
     {
@@ -15,7 +21,7 @@ class CardShoeState extends AbstractState
             return;
         }
 
-        $cards = collect();
+        $cards = new CardCollection();
 
         for ($i = 0; $i < $numDecks; $i++) {
             foreach (CardState::listSuits() as $suitKey => $suitValue) {
@@ -30,25 +36,40 @@ class CardShoeState extends AbstractState
 
     public function dealCardOut(): CardState
     {
+        // todo logic to ensure we have enough cards beforehand?
         return $this->cards->shift();
     }
 
-    public function jsonSerialize()
+    /**
+     * @phpstan-return SerializedCardShoeState
+     * @return array
+     */
+    public function jsonSerialize(): array
     {
         return [
-            'cards' => $this->cards,
+            'cards' => $this->cards->jsonSerialize(),
         ];
     }
 
+    /**
+     * @param array $cardShoeData
+     * @phpstan-param SerializedCardShoeState $cardShoeData
+     * @return static
+     */
     public static function loadFromSaveData(array $cardShoeData): static
     {
-        return (new CardShoeState(null))
+        return (new static(null))
             ->setCardsFromArray($cardShoeData['cards']);
     }
 
+    /**
+     * @param array $cards
+     * @phpstan-param SerializedCardCollection $cards
+     * @return $this
+     */
     public function setCardsFromArray(array $cards): self
     {
-        $this->cards = collect();
+        $this->cards = new CardCollection();
 
         for ($i = 0; $i < count($cards); $i++) {
             $this->cards[$i] = new CardState($cards[$i]['suit'], $cards[$i]['value']);
