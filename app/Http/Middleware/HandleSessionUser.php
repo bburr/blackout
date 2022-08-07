@@ -13,7 +13,7 @@ class HandleSessionUser
     public function handle(Request $request, Closure $next): Response
     {
         if (! Session::has(User::CACHE_KEY_USER_ID)) {
-            return abort(Response::HTTP_UNAUTHORIZED);
+            return abort(Response::HTTP_UNAUTHORIZED, 'You do not have an active session');
         }
 
         $request->merge([

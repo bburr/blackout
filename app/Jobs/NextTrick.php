@@ -30,6 +30,8 @@ class NextTrick
 
         $trickWinnerIndex = Bus::dispatch(new DetermineTrickWinner($trumpCard, $leadingCard, $plays));
 
+        $this->gameState->setLeadingPlayerIndex($trickWinnerIndex);
+        $this->gameState->getCurrentRound()->newTrick();
         $this->gameState->getCurrentRound()->setNextPlayerIndexToPlay($trickWinnerIndex);
     }
 }

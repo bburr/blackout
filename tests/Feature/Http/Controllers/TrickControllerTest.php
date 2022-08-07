@@ -4,9 +4,9 @@ namespace Tests\Feature\Http\Controllers;
 
 use Tests\Feature\AbstractFeatureTest;
 
-class RoundControllerTest extends AbstractFeatureTest
+class TrickControllerTest extends AbstractFeatureTest
 {
-    public function testPerformBet(): void
+    public function testPlayCard(): void
     {
         $numPlayers = 3;
 
@@ -43,22 +43,7 @@ class RoundControllerTest extends AbstractFeatureTest
             }
         }
 
-        $response = $this->postJson('/api/round/perform-bet', [
-            'game_id' => $gameResponse->json('uuid'),
-            'bet' => 1,
-        ]);
 
-        $response->assertStatus(400);
-    }
-
-    public function testStartNextRound(): void
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function testStartNextRoundAsUser(): void
-    {
-        $this->markTestIncomplete();
     }
 
     protected function addUserToLobby(string $lobbyId): string

@@ -35,7 +35,7 @@ class MakePlayForNextPlayer
         $this->gameState->getCurrentRound()->makePlayForNextPlayer($this->cardState);
         $this->playerState->getHand()->forget($index);
         $playerIndex = $this->gameState->getCurrentRound()->getNextPlayerIndexToPlay();
-        $this->gameState->getCurrentRound()->setNextPlayerIndexToPlay($this->gameState->advancePlayerIndexUntilDealer($playerIndex));
+        $this->gameState->getCurrentRound()->setNextPlayerIndexToPlay($this->gameState->advancePlayerIndexUntilLeadingPlayer($playerIndex));
 
         if ($this->gameState->getCurrentRound()->getCurrentTrick()->isTrickDone($this->gameState->getPlayers()->count())) {
             Bus::dispatch(new NextTrick($this->gameState));

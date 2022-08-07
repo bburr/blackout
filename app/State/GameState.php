@@ -24,6 +24,8 @@ class GameState extends AbstractState
 
     protected int $dealerIndex;
 
+    protected int $leadingPlayerIndex;
+
     protected CardShoeState $shoe;
 
     /** @var Collection<int, PlayerState> */
@@ -55,9 +57,9 @@ class GameState extends AbstractState
         $this->dealerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
     }
 
-    public function advancePlayerIndexUntilDealer(int $playerIndex): int
+    public function advancePlayerIndexUntilLeadingPlayer(int $playerIndex): int
     {
-        if ($playerIndex === $this->dealerIndex) {
+        if ($playerIndex === $this->leadingPlayerIndex) {
             $playerIndex = -1;
         }
 
@@ -144,7 +146,7 @@ class GameState extends AbstractState
             $this->players->add(new PlayerState($user));
         }
 
-        $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
+        $this->dealerIndex = $this->leadingPlayerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
 
         Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumTricks(), true));
     }
@@ -154,6 +156,7 @@ class GameState extends AbstractState
         return [
             'game_id' => $this->game->getKey(),
             'dealer_index' => $this->getDealerIndex(),
+            'leading_player_index' => $this->leadingPlayerIndex,
             'settings' => $this->getGameSettings()->jsonSerialize(),
         ];
     }
@@ -162,6 +165,7 @@ class GameState extends AbstractState
     {
         $gameStateData = $this->cacheHandler->cacheGet(self::GAME_STATE_CACHE_KEY);
         $this->dealerIndex = $gameStateData['dealer_index'];
+        $this->leadingPlayerIndex = $gameStateData['leading_player_index'];
         // todo load settings
         $this->gameSettings = (new GameSettings());
 
@@ -190,6 +194,11 @@ class GameState extends AbstractState
     public function setCurrentRound(RoundState $roundState): void
     {
         $this->currentRound = $roundState;
+    }
+
+    public function setLeadingPlayerIndex(int $index): void
+    {
+        $this->leadingPlayerIndex = $index;
     }
 
     public function setShoe(CardShoeState $cardShoeState): void

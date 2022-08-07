@@ -2,13 +2,10 @@
 
 namespace Tests\Feature\Http\Controllers;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\Feature\AbstractFeatureTest;
 
-class LobbyControllerTest extends TestCase
+class LobbyControllerTest extends AbstractFeatureTest
 {
-    use RefreshDatabase;
-
     public function testCreateLobby(): void
     {
         $this->postJson('/api/user/create-user', ['name' => 'Bob']);
@@ -26,12 +23,13 @@ class LobbyControllerTest extends TestCase
         $this->postJson('/api/user/create-user', ['name' => 'Jim']);
 
         $response = $this->postJson('/api/lobby/join-lobby', [
-            'invite_code' => $lobbyResponse->json()['invite_code'],
+            'invite_code' => $lobbyResponse->json('invite_code'),
         ]);
 
         $response->assertStatus(200);
     }
 
+    // todo test with invite code
     public function testAddUserToLobby(): void
     {
         $this->postJson('/api/user/create-user', ['name' => 'Bob']);
@@ -42,8 +40,8 @@ class LobbyControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('api/admin/lobby/add-user-to-lobby', [
-            'lobby_id' => $lobbyResponse->json()['uuid'],
-            'user_id' => $userResponse->json()['uuid'],
+            'lobby_id' => $lobbyResponse->json('uuid'),
+            'user_id' => $userResponse->json('uuid'),
         ]);
 
         $response->assertStatus(200);

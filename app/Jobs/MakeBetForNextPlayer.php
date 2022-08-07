@@ -14,6 +14,6 @@ class MakeBetForNextPlayer
     {
         $this->gameState->getCurrentRound()->makeBetForNextPlayer($this->bet);
         $bettingPlayerIndex = $this->gameState->getCurrentRound()->getNextPlayerIndexToBet();
-        $this->gameState->getCurrentRound()->setNextPlayerIndexToBet($this->gameState->advancePlayerIndexUntilDealer($bettingPlayerIndex));
+        $this->gameState->getCurrentRound()->setNextPlayerIndexToBet($this->gameState->advancePlayerIndexUntilLeadingPlayer($bettingPlayerIndex));
     }
 }

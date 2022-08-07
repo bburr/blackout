@@ -22,7 +22,7 @@ class GameStateCacheHandler implements GameStateCacheHandlerInterface
 
     public function cacheHas(string $key): bool
     {
-        return Cache::has($key);
+        return Cache::has($this->cacheKey($key));
     }
 
     public function cachePut(string $key, mixed $value): void

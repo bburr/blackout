@@ -2,13 +2,10 @@
 
 namespace Tests\Feature\Http\Controllers;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\Feature\AbstractFeatureTest;
 
-class UserControllerTest extends TestCase
+class UserControllerTest extends AbstractFeatureTest
 {
-    use RefreshDatabase;
-
     public function testCreateUser(): void
     {
         $response = $this->postJson('/api/user/create-user', [

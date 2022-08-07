@@ -28,7 +28,7 @@ class RoundState extends AbstractState
 
     public function __construct(protected int $roundNumber, protected int $numTricks, protected bool $isNumTricksAscending, protected int $nextPlayerIndexToBet, protected int $nextPlayerIndexToPlay)
     {
-        $this->currentTrick = new TrickState();
+        $this->newTrick();
         $this->previousTricks = new TrickCollection();
     }
 
@@ -152,6 +152,11 @@ class RoundState extends AbstractState
     public function makePlayForNextPlayer(CardState $cardState): void
     {
         $this->currentTrick->makePlayForPlayer($this->nextPlayerIndexToPlay, $cardState);
+    }
+
+    public function newTrick(): void
+    {
+        $this->currentTrick = new TrickState();
     }
 
     /**

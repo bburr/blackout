@@ -13,6 +13,7 @@ class DetermineDealerTest extends TestCase
 
         $subject = new DetermineDealer($playerIndexes);
 
+        // todo any way to force the numbers to test a recursive call?
         $this->assertContains($subject->handle(), $playerIndexes);
     }
 }

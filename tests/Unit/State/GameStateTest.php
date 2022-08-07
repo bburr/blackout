@@ -50,6 +50,7 @@ class GameStateTest extends TestCase
             ],
             GameState::GAME_STATE_CACHE_KEY . $gameKey => [
                 'dealer_index' => 0,
+                'leading_player_index' => 0,
             ],
             GameState::PLAYERS_CACHE_KEY . $gameKey => [
                 (new PlayerState(User::factory()->makeOne()))->jsonSerialize(),
@@ -69,7 +70,7 @@ class GameStateTest extends TestCase
         $this->markTestIncomplete('waiting to add assertions until more loading logic is implemented');
     }
 
-    public function testAdvancePlayerIndexUntilDealer(): void
+    public function testAdvancePlayerIndexUntilLeadingPlayer(): void
     {
         $numUsers = 3;
         $gameState = $this->getBasicGameState($numUsers);
@@ -78,11 +79,11 @@ class GameStateTest extends TestCase
         $playerIndex = $gameState->getPlayerIndexAfter($dealerIndex);
 
         for ($i = 0; $i < $numUsers - 1; $i++) {
-            $playerIndex = $gameState->advancePlayerIndexUntilDealer($playerIndex);
+            $playerIndex = $gameState->advancePlayerIndexUntilLeadingPlayer($playerIndex);
             $this->assertNotEquals(-1, $playerIndex);
         }
 
-        $playerIndex = $gameState->advancePlayerIndexUntilDealer($playerIndex);
+        $playerIndex = $gameState->advancePlayerIndexUntilLeadingPlayer($playerIndex);
         $this->assertEquals(-1, $playerIndex);
     }
 

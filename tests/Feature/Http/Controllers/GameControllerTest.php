@@ -2,13 +2,10 @@
 
 namespace Tests\Feature\Http\Controllers;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\Feature\AbstractFeatureTest;
 
-class GameControllerTest extends TestCase
+class GameControllerTest extends AbstractFeatureTest
 {
-    use RefreshDatabase;
-
     public function testStartGame(): void
     {
         $numPlayers = 3;
@@ -16,7 +13,7 @@ class GameControllerTest extends TestCase
         $this->postJson('/api/user/create-user', ['name' => 'Bob']);
 
         $lobbyResponse = $this->postJson('/api/lobby/create-lobby');
-        $lobbyId = $lobbyResponse->json()['uuid'];
+        $lobbyId = $lobbyResponse->json('uuid');
 
         for ($i = 0; $i < $numPlayers - 1; $i++) {
             $this->addUserToLobby($lobbyId);
@@ -35,7 +32,7 @@ class GameControllerTest extends TestCase
 
         $this->postJson('api/admin/lobby/add-user-to-lobby', [
             'lobby_id' => $lobbyId,
-            'user_id' => $userResponse->json()['uuid'],
+            'user_id' => $userResponse->json('uuid'),
         ]);
     }
 }
