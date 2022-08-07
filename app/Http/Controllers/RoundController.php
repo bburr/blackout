@@ -4,15 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Round\PerformBet;
 use App\Http\Requests\Round\PerformBetAsUser;
-use App\Http\Requests\Round\PlayCard;
-use App\Http\Requests\Round\PlayCardAsUser;
 use App\Http\Requests\Round\StartNextRound;
 use App\Http\Requests\Round\StartNextRoundAsUser;
 use App\Jobs\MakeBetForNextPlayer;
-use App\Jobs\MakePlayForNextPlayer;
 use App\Jobs\NextRound;
 use App\Models\Game;
-use App\State\CardState;
 use App\State\GameState;
 use Illuminate\Support\Facades\Bus;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,32 +39,6 @@ class RoundController extends Controller
     public function performBetAsUser(PerformBetAsUser $request): void
     {
         $this->performBet($request);
-    }
-
-    public function playCard(PlayCard $request): void
-    {
-        /** @var Game|null $game */
-        $game = Game::find($request->get('game_id'));
-
-        abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
-
-        $gameState = new GameState($game, null);
-
-        abort_unless($gameState->getCurrentRound()->isBettingDone(), Response::HTTP_BAD_REQUEST, 'Betting is still ongoing for current round');
-
-        $player = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToPlay());
-
-        abort_if($player === null, Response::HTTP_BAD_REQUEST, 'It is not the time to play a card');
-        abort_unless($player->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to play');
-
-        Bus::dispatch(new MakePlayForNextPlayer($gameState, $player, new CardState($request->get('card_suit'), $request->get('card_value'))));
-
-        $gameState->save();
-    }
-
-    public function playCardAsUser(PlayCardAsUser $request): void
-    {
-        $this->playCard($request);
     }
 
     public function startNextRound(StartNextRound $request): void

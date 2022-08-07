@@ -6,6 +6,7 @@ use App\Exceptions\InvalidCardForPlayException;
 use App\State\CardState;
 use App\State\GameState;
 use App\State\PlayerState;
+use Illuminate\Support\Facades\Bus;
 
 class MakePlayForNextPlayer
 {
@@ -35,5 +36,9 @@ class MakePlayForNextPlayer
         $this->playerState->getHand()->forget($index);
         $playerIndex = $this->gameState->getCurrentRound()->getNextPlayerIndexToPlay();
         $this->gameState->getCurrentRound()->setNextPlayerIndexToPlay($this->gameState->advancePlayerIndexUntilDealer($playerIndex));
+
+        if ($this->gameState->getCurrentRound()->getCurrentTrick()->isTrickDone($this->gameState->getPlayers()->count())) {
+            Bus::dispatch(new NextTrick($this->gameState));
+        }
     }
 }

@@ -32,6 +32,11 @@ class RoundState extends AbstractState
         $this->previousTricks = new TrickCollection();
     }
 
+    public function addPreviousTrick(TrickState $trickState): void
+    {
+        $this->previousTricks->add($trickState);
+    }
+
     /**
      * @return int[]
      */
@@ -82,7 +87,7 @@ class RoundState extends AbstractState
 
     public function isRoundDone(): bool
     {
-        return $this->previousTricks->count() === $this->numTricks - 1 && $this->currentTrick->isTrickDone(count($this->bets));
+        return $this->previousTricks->count() === $this->numTricks;
     }
 
     /**

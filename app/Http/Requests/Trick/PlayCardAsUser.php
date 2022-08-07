@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Http\Requests\Round;
+namespace App\Http\Requests\Trick;
 
 class PlayCardAsUser extends PlayCard
 {

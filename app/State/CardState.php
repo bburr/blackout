@@ -21,6 +21,11 @@ class CardState extends AbstractState
         return $this->suitKey;
     }
 
+    public function getValueKey(): int
+    {
+        return $this->valueKey;
+    }
+
     /**
      * @phpstan-return SerializedCardState
      * @return array

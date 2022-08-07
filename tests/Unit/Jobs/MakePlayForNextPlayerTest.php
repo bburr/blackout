@@ -4,6 +4,7 @@ namespace Tests\Unit\Jobs;
 
 use App\Exceptions\InvalidCardForPlayException;
 use App\Jobs\MakePlayForNextPlayer;
+use App\Jobs\NextTrick;
 use App\Models\Game;
 use App\Models\User;
 use App\State\CardState;
@@ -11,6 +12,7 @@ use App\State\Collections\CardCollection;
 use App\State\GameState;
 use App\State\PlayerState;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Bus;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -180,5 +182,41 @@ class MakePlayForNextPlayerTest extends TestCase
         else {
             $this->assertEquals($cardState, $gameState->getCurrentRound()->getCurrentTrick()->getLeadingCard());
         }
+
+        $this->doesntExpectJobs(NextTrick::class);
+    }
+
+    public function testHandleNextTrick(): void
+    {
+        $game = $this->partialMock(Game::class, function (MockInterface $mock) {
+            $mock->shouldReceive('getUsers')->andReturn(new Collection(User::factory(3)->make()));
+        });
+
+        $gameState = new GameState($game, null);
+
+        Bus::fake();
+
+        $card = ['suit' => 'S', 'value' => 12];
+        $this->makePlay($gameState, [$card], $card);
+        Bus::assertNotDispatched(NextTrick::class);
+
+        $this->makePlay($gameState, [$card], $card);
+        Bus::assertNotDispatched(NextTrick::class);
+
+        $this->makePlay($gameState, [$card], $card);
+        Bus::assertDispatched(NextTrick::class);
+    }
+
+    protected function makePlay(GameState $gameState, array $playerHand, array $cardData): void
+    {
+        $playerState = new PlayerState(User::factory()->makeOne());
+
+        $playerState->setHandFromArray($playerHand);
+
+        $cardState = new CardState($cardData['suit'], $cardData['value']);
+
+        $subject = new MakePlayForNextPlayer($gameState, $playerState, $cardState);
+
+        $subject->handle();
     }
 }
