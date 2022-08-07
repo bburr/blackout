@@ -4,13 +4,13 @@ namespace App\State;
 
 class GameSettings extends AbstractState
 {
-    public function getEndingNumCards(): int
+    public function getEndingNumTricks(): int
     {
         // todo
         return 3;
     }
 
-    public function getMaxNumCards(): int
+    public function getMaxNumTricks(): int
     {
         // todo
         return 5;
@@ -34,7 +34,7 @@ class GameSettings extends AbstractState
         return 1;
     }
 
-    public function getStartingNumCards(): int
+    public function getStartingNumTricks(): int
     {
         // todo
         return 3;

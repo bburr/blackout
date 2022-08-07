@@ -9,6 +9,7 @@ use App\Http\Requests\Round\PlayCardAsUser;
 use App\Http\Requests\Round\StartNextRound;
 use App\Http\Requests\Round\StartNextRoundAsUser;
 use App\Jobs\MakeBetForNextPlayer;
+use App\Jobs\MakePlayForNextPlayer;
 use App\Jobs\NextRound;
 use App\Models\Game;
 use App\State\CardState;
@@ -60,7 +61,7 @@ class RoundController extends Controller
         abort_if($player === null, Response::HTTP_BAD_REQUEST, 'It is not the time to play a card');
         abort_unless($player->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to play');
 
-        $gameState->makePlayForNextPlayer(new CardState($request->get('card_suit'), $request->get('card_value')));
+        Bus::dispatch(new MakePlayForNextPlayer($gameState, $player, new CardState($request->get('card_suit'), $request->get('card_value'))));
 
         $gameState->save();
     }
@@ -76,13 +77,11 @@ class RoundController extends Controller
         $game = Game::find($request->get('game_id'));
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
-        dump($game->getLobby()->getUsers()->firstWhere('pivot.is_owner', '=', true)->getKey(), $request->get('auth_user_id'));
-        abort_unless($game->getLobby()->getUsers()->firstWhere('pivot.is_owner', '=', true)->getKey() === $request->get('auth_user_id'), Response::HTTP_UNAUTHORIZED, 'You are not the lobby owner');
+        abort_unless($game->getLobby()->getUsers()->firstWhere('pivot.is_owner', '=', true)?->getKey() === $request->get('auth_user_id'), Response::HTTP_UNAUTHORIZED, 'You are not the lobby owner');
 
         $gameState = new GameState($game, null);
 
-        // todo this check is wrong - do not start next round until all hands are empty
-        abort_unless($gameState->getCurrentRound()->isPlayDone(), Response::HTTP_BAD_REQUEST, 'The current round is not yet done');
+        abort_unless($gameState->getCurrentRound()->isRoundDone(), Response::HTTP_BAD_REQUEST, 'The current round is not yet done');
 
         Bus::dispatch(new NextRound($gameState));
     }

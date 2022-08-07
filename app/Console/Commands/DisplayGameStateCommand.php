@@ -31,8 +31,8 @@ class DisplayGameStateCommand extends Command
             ['Betting Player', $bettingPlayer ? $bettingPlayer->getUser()->getKey() : ''],
             ['Next Player', $nextPlayer ? $nextPlayer->getUser()->getKey() : ''],
             ['Round Number', $currentRound->getRoundNumber()],
-            ['Num Cards', $currentRound->getNumCards()],
-            ['Num Cards Asc?', $currentRound->isNumCardsAscending()],
+            ['Num Cards', $currentRound->getNumTricks()],
+            ['Num Cards Asc?', $currentRound->isNumTricksAscending()],
             ['Trump Card', $currentRound->getTrumpCard()],
         ];
 
@@ -41,8 +41,9 @@ class DisplayGameStateCommand extends Command
         $headers = [];
         $rows = [];
 
+        // todo update display to handle tricks
         $bets = $gameState->getCurrentRound()->getBets();
-        $plays = $gameState->getCurrentRound()->getPlays();
+        $plays = $gameState->getCurrentRound()->getCurrentTrick()->getPlays();
 
         $playerIndex = 0;
         foreach ($gameState->getPlayers() as $player) {

@@ -13,15 +13,15 @@ class StartRoundTest extends TestCase
     public function testHandle(): void
     {
         $roundNumber = 1;
-        $numCards = 3;
-        $isNumCardsAscending = true;
+        $numTricks = 3;
+        $isNumTricksAscending = true;
 
         $gameState = $this->partialMock(GameState::class, function (MockInterface $mock) {
             $mock->shouldReceive('getDealerIndex')->andReturn(0);
             $mock->shouldReceive('getPlayerIndexAfter')->andReturn(1);
         });
 
-        $subject = new StartRound($gameState, $roundNumber, $numCards, $isNumCardsAscending);
+        $subject = new StartRound($gameState, $roundNumber, $numTricks, $isNumTricksAscending);
 
         $this->expectsJobs(DealForRound::class);
 

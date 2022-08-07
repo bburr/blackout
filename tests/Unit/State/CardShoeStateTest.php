@@ -12,6 +12,9 @@ class CardShoeStateTest extends TestCase
 {
     const NUM_CARDS_PER_DECK = 52;
 
+    /**
+     * @var array<string, int>
+     */
     protected array $uniqueCards = [];
 
     /**

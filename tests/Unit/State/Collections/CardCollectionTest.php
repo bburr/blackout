@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CardCollectionTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $collection = new CardCollection();
 

@@ -13,19 +13,20 @@ class RoundStateTest extends TestCase
     public function testConstructor(): void
     {
         $roundNumber = 1;
-        $numCards = 3;
-        $isNumCardsAscending = true;
+        $numTricks = 3;
+        $isNumTricksAscending = true;
         $nextPlayerIndex = 0;
 
-        $round = new RoundState($roundNumber, $numCards, $isNumCardsAscending, $nextPlayerIndex, $nextPlayerIndex);
+        $round = new RoundState($roundNumber, $numTricks, $isNumTricksAscending, $nextPlayerIndex, $nextPlayerIndex);
         $this->assertInstanceOf(RoundState::class, $round);
-        $this->assertInstanceOf(CardCollection::class, $round->getPlays());
-        $this->assertEquals(0, $round->getPlays()->count());
+        $this->assertInstanceOf(CardCollection::class, $round->getCurrentTrick()->getPlays());
+        $this->assertEquals(0, $round->getCurrentTrick()->getPlays()->count());
         $this->assertCount(0, $round->getBets());
         $this->assertNull($round->getTrumpCard());
+        $this->assertNull($round->getCurrentTrick()->getLeadingCard());
         $this->assertEquals($roundNumber, $round->getRoundNumber());
-        $this->assertEquals($numCards, $round->getNumCards());
-        $this->assertEquals($isNumCardsAscending, $round->isNumCardsAscending());
+        $this->assertEquals($numTricks, $round->getNumTricks());
+        $this->assertEquals($isNumTricksAscending, $round->isNumTricksAscending());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToBet());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToPlay());
     }
@@ -33,31 +34,36 @@ class RoundStateTest extends TestCase
     public function testLoadFromSaveDataEmpty(): void
     {
         $roundNumber = 1;
-        $numCards = 3;
-        $isNumCardsAscending = true;
+        $numTricks = 3;
+        $isNumTricksAscending = true;
         $nextPlayerIndex = 0;
 
         $round = RoundState::loadFromSaveData([
             'config' => [
                 'round_number' => $roundNumber,
-                'num_cards' => $numCards,
-                'is_num_cards_ascending' => $isNumCardsAscending,
+                'num_tricks' => $numTricks,
+                'is_num_tricks_ascending' => $isNumTricksAscending,
                 'next_player_index_to_bet' => $nextPlayerIndex,
                 'next_player_index_to_play' => $nextPlayerIndex,
             ],
             'trump_card' => null,
             'bets' => [],
-            'plays' => [],
+            'current_trick' => [
+                'leading_card' => null,
+                'plays' => [],
+            ],
+            'previous_tricks' => [],
         ]);
 
         $this->assertInstanceOf(RoundState::class, $round);
-        $this->assertInstanceOf(CardCollection::class, $round->getPlays());
-        $this->assertEquals(0, $round->getPlays()->count());
+        $this->assertInstanceOf(CardCollection::class, $round->getCurrentTrick()->getPlays());
+        $this->assertEquals(0, $round->getCurrentTrick()->getPlays()->count());
         $this->assertCount(0, $round->getBets());
         $this->assertNull($round->getTrumpCard());
+        $this->assertNull($round->getCurrentTrick()->getLeadingCard());
         $this->assertEquals($roundNumber, $round->getRoundNumber());
-        $this->assertEquals($numCards, $round->getNumCards());
-        $this->assertEquals($isNumCardsAscending, $round->isNumCardsAscending());
+        $this->assertEquals($numTricks, $round->getNumTricks());
+        $this->assertEquals($isNumTricksAscending, $round->isNumTricksAscending());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToBet());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToPlay());
     }
@@ -65,15 +71,15 @@ class RoundStateTest extends TestCase
     public function testLoadFromSaveData(): void
     {
         $roundNumber = 1;
-        $numCards = 3;
-        $isNumCardsAscending = true;
+        $numTricks = 3;
+        $isNumTricksAscending = true;
         $nextPlayerIndex = 1;
 
         $round = RoundState::loadFromSaveData([
             'config' => [
                 'round_number' => $roundNumber,
-                'num_cards' => $numCards,
-                'is_num_cards_ascending' => $isNumCardsAscending,
+                'num_tricks' => $numTricks,
+                'is_num_tricks_ascending' => $isNumTricksAscending,
                 'next_player_index_to_bet' => $nextPlayerIndex,
                 'next_player_index_to_play' => $nextPlayerIndex,
             ],
@@ -81,21 +87,26 @@ class RoundStateTest extends TestCase
             'bets' => [
                 0 => 1,
             ],
-            'plays' => [
-                0 => ['suit' => 'H', 'value' => 10],
+            'previous_tricks' => [],
+            'current_trick' => [
+                'leading_card' => ['suit' => 'H', 'value' => 10],
+                'plays' => [
+                    0 => ['suit' => 'H', 'value' => 10],
+                ],
             ],
         ]);
 
         $this->assertInstanceOf(RoundState::class, $round);
-        $this->assertInstanceOf(CardCollection::class, $round->getPlays());
-        $this->assertEquals(1, $round->getPlays()->count());
-        $this->assertEquals('Q of Hearts', (string) $round->getPlays()[0]);
+        $this->assertInstanceOf(CardCollection::class, $round->getCurrentTrick()->getPlays());
+        $this->assertEquals(1, $round->getCurrentTrick()->getPlays()->count());
+        $this->assertEquals('Q of Hearts', (string) $round->getCurrentTrick()->getPlays()[0]);
         $this->assertCount(1, $round->getBets());
         $this->assertEquals(1, $round->getBets()[0]);
         $this->assertEquals('A of Spades', (string) $round->getTrumpCard());
+        $this->assertEquals('Q of Hearts', (string) $round->getCurrentTrick()->getLeadingCard());
         $this->assertEquals($roundNumber, $round->getRoundNumber());
-        $this->assertEquals($numCards, $round->getNumCards());
-        $this->assertEquals($isNumCardsAscending, $round->isNumCardsAscending());
+        $this->assertEquals($numTricks, $round->getNumTricks());
+        $this->assertEquals($isNumTricksAscending, $round->isNumTricksAscending());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToBet());
         $this->assertEquals($nextPlayerIndex, $round->getNextPlayerIndexToPlay());
     }
@@ -115,13 +126,13 @@ class RoundStateTest extends TestCase
     /**
      * @dataProvider dataMakeBetForNextPlayer
      * @param int $bet
-     * @param int $numCards
+     * @param int $numTricks
      * @param bool $expectException
      * @return void
      */
-    public function testMakeBetForNextPlayer(int $bet, int $numCards, bool $expectException): void
+    public function testMakeBetForNextPlayer(int $bet, int $numTricks, bool $expectException): void
     {
-        $round = new RoundState(1, $numCards, false, 0, 0);
+        $round = new RoundState(1, $numTricks, false, 0, 0);
 
         if ($expectException) {
             $this->expectException(InvalidBetAmountException::class);
@@ -136,8 +147,17 @@ class RoundStateTest extends TestCase
     {
         $round = new RoundState(1, 3, false, 0, 0);
 
-        $round->makePlayForNextPlayer(new CardState('S', 12));
+        $this->assertNull($round->getCurrentTrick()->getLeadingCard());
 
-        $this->assertCount(1, $round->getPlays());
+        $cardState = new CardState('S', 12);
+        $round->makePlayForNextPlayer($cardState);
+
+        $this->assertEquals((string) $cardState, (string) $round->getCurrentTrick()->getLeadingCard());
+
+        $round->makePlayForNextPlayer(new CardState('H', 10));
+
+        $this->assertEquals((string) $cardState, (string) $round->getCurrentTrick()->getLeadingCard());
+
+        $this->assertCount(1, $round->getCurrentTrick()->getPlays());
     }
 }

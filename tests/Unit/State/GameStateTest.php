@@ -39,13 +39,14 @@ class GameStateTest extends TestCase
             GameState::CURRENT_ROUND_CACHE_KEY . $gameKey => [
                 'config' => [
                     'round_number' => 1,
-                    'num_cards' => 3,
-                    'is_num_cards_ascending' => true,
+                    'num_tricks' => 3,
+                    'is_num_tricks_ascending' => true,
                     'next_player_index_to_bet' => 0,
                     'next_player_index_to_play' => 0,
                 ],
                 'bets' => [],
-                'plays' => [],
+                'current_trick' => ['plays' => []],
+                'previous_tricks' => [],
             ],
             GameState::GAME_STATE_CACHE_KEY . $gameKey => [
                 'dealer_index' => 0,
@@ -68,19 +69,21 @@ class GameStateTest extends TestCase
         $this->markTestIncomplete('waiting to add assertions until more loading logic is implemented');
     }
 
-    public function testAdvanceBettingPlayerIndex(): void
+    public function testAdvancePlayerIndexUntilDealer(): void
     {
         $numUsers = 3;
         $gameState = $this->getBasicGameState($numUsers);
         $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToBet());
+        $dealerIndex = $gameState->getDealerIndex();
+        $playerIndex = $gameState->getPlayerIndexAfter($dealerIndex);
 
         for ($i = 0; $i < $numUsers - 1; $i++) {
-            $gameState->advanceBettingPlayerIndex();
-            $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToBet());
+            $playerIndex = $gameState->advancePlayerIndexUntilDealer($playerIndex);
+            $this->assertNotEquals(-1, $playerIndex);
         }
 
-        $gameState->advanceBettingPlayerIndex();
-        $this->assertEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToBet());
+        $playerIndex = $gameState->advancePlayerIndexUntilDealer($playerIndex);
+        $this->assertEquals(-1, $playerIndex);
     }
 
     public function testAdvanceDealerIndex(): void
@@ -94,24 +97,15 @@ class GameStateTest extends TestCase
         }
     }
 
-    public function testAdvancePlayerIndex(): void
+    public function testGetPlayerIndexAfter(): void
     {
-        $numUsers = 3;
-        $gameState = $this->getBasicGameState($numUsers);
-        $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToPlay());
+        $gameState = $this->getBasicGameState(5);
 
-        for ($i = 0; $i < $numUsers - 1; $i++) {
-            $gameState->advancePlayerIndex();
-            $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToPlay());
-        }
-
-        $gameState->advancePlayerIndex();
-        $this->assertEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToPlay());
-    }
-
-    public function testMakePlayForNextPlayer(): void
-    {
-        $this->markTestIncomplete('waiting until valid play logic is implemented, also will be moving this method to a job');
+        $this->assertEquals(1, $gameState->getPlayerIndexAfter(0));
+        $this->assertEquals(2, $gameState->getPlayerIndexAfter(1));
+        $this->assertEquals(3, $gameState->getPlayerIndexAfter(2));
+        $this->assertEquals(4, $gameState->getPlayerIndexAfter(3));
+        $this->assertEquals(0, $gameState->getPlayerIndexAfter(4));
     }
 
     protected function bindCacheHandler(string $gameKey, array $data): void

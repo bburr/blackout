@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Bus;
 class StartRound
 {
 
-    public function __construct(protected GameState $gameState, protected int $roundNumber, protected int $numCards, protected bool $isNumCardsAscending)
+    public function __construct(protected GameState $gameState, protected int $roundNumber, protected int $numTricks, protected bool $isNumTricksAscending)
     {
     }
 
@@ -20,8 +20,8 @@ class StartRound
 
         $this->gameState->setCurrentRound(new RoundState(
             $this->roundNumber,
-            $this->numCards,
-            $this->isNumCardsAscending,
+            $this->numTricks,
+            $this->isNumTricksAscending,
             $playerIndexAfterDealer,
             $playerIndexAfterDealer
         ));

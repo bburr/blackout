@@ -13,7 +13,7 @@ class DealForRound
 
     public function handle(): void
     {
-        for ($i = 0; $i < $this->gameState->getCurrentRound()->getNumCards(); $i++) {
+        for ($i = 0; $i < $this->gameState->getCurrentRound()->getNumTricks(); $i++) {
             /** @var PlayerState $player */
             foreach ($this->gameState->getPlayersInDealingOrder() as $player) {
                 $player->addToHand($this->gameState->getCardShoeState()->dealCardOut());

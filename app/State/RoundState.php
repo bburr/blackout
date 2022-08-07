@@ -3,29 +3,33 @@
 namespace App\State;
 
 use App\Exceptions\InvalidBetAmountException;
-use App\State\Collections\CardCollection;
+use App\State\Collections\TrickCollection;
 
 /**
  * @phpstan-consistent-constructor
  * @phpstan-import-type SerializedCardState from CardState
- * @phpstan-import-type SerializedCardCollection from CardCollection
- * @phpstan-type SerializedRoundConfig array{round_number: int, num_cards: int, is_num_cards_ascending: bool, next_player_index_to_bet: int, next_player_index_to_play: int}
- * @phpstan-type SerializedRoundState array{config: SerializedRoundConfig, trump_card: SerializedCardState|null, bets: int[], plays: SerializedCardCollection}
+ * @phpstan-import-type SerializedTrickState from TrickState
+ * @phpstan-import-type SerializedTrickCollection from TrickCollection
+ * @phpstan-type SerializedRoundConfig array{round_number: int, num_tricks: int, is_num_tricks_ascending: bool, next_player_index_to_bet: int, next_player_index_to_play: int}
+ * @phpstan-type SerializedRoundState array{config: SerializedRoundConfig, trump_card: SerializedCardState|null, bets: int[], previous_tricks: SerializedTrickCollection, current_trick: SerializedTrickState}
  */
 class RoundState extends AbstractState
 {
     /**
-     * @var array<int, int>
+     * @var int[]
      */
     protected array $bets = [];
 
-    protected CardCollection $plays;
+    protected TrickState $currentTrick;
+
+    protected TrickCollection $previousTricks;
 
     protected ?CardState $trumpCard = null;
 
-    public function __construct(protected int $roundNumber, protected int $numCards, protected bool $isNumCardsAscending, protected int $nextPlayerIndexToBet, protected int $nextPlayerIndexToPlay)
+    public function __construct(protected int $roundNumber, protected int $numTricks, protected bool $isNumTricksAscending, protected int $nextPlayerIndexToBet, protected int $nextPlayerIndexToPlay)
     {
-        $this->plays = new CardCollection();
+        $this->currentTrick = new TrickState();
+        $this->previousTricks = new TrickCollection();
     }
 
     /**
@@ -34,6 +38,11 @@ class RoundState extends AbstractState
     public function getBets(): array
     {
         return $this->bets;
+    }
+
+    public function getCurrentTrick(): TrickState
+    {
+        return $this->currentTrick;
     }
 
     public function getNextPlayerIndexToBet(): int
@@ -46,14 +55,9 @@ class RoundState extends AbstractState
         return $this->nextPlayerIndexToPlay;
     }
 
-    public function getNumCards(): int
+    public function getNumTricks(): int
     {
-        return $this->numCards;
-    }
-
-    public function getPlays(): CardCollection
-    {
-        return $this->plays;
+        return $this->numTricks;
     }
 
     public function getRoundNumber(): int
@@ -71,14 +75,14 @@ class RoundState extends AbstractState
         return $this->nextPlayerIndexToBet < 0;
     }
 
-    public function isNumCardsAscending(): bool
+    public function isNumTricksAscending(): bool
     {
-        return $this->isNumCardsAscending;
+        return $this->isNumTricksAscending;
     }
 
-    public function isPlayDone(): bool
+    public function isRoundDone(): bool
     {
-        return $this->nextPlayerIndexToPlay < 0;
+        return $this->previousTricks->count() === $this->numTricks - 1 && $this->currentTrick->isTrickDone(count($this->bets));
     }
 
     /**
@@ -89,14 +93,15 @@ class RoundState extends AbstractState
         return [
             'config' => [
                 'round_number' => $this->roundNumber,
-                'num_cards' => $this->numCards,
-                'is_num_cards_ascending' => $this->isNumCardsAscending,
+                'num_tricks' => $this->numTricks,
+                'is_num_tricks_ascending' => $this->isNumTricksAscending,
                 'next_player_index_to_bet' => $this->nextPlayerIndexToBet,
                 'next_player_index_to_play' => $this->nextPlayerIndexToPlay,
             ],
             'trump_card' => $this->trumpCard?->jsonSerialize(),
             'bets' => $this->bets,
-            'plays' => $this->plays->jsonSerialize(),
+            'previous_tricks' => $this->previousTricks->jsonSerialize(),
+            'current_trick' => $this->currentTrick->jsonSerialize(),
         ];
     }
 
@@ -109,8 +114,8 @@ class RoundState extends AbstractState
     {
         $round = (new static(
             $roundData['config']['round_number'],
-            $roundData['config']['num_cards'],
-            $roundData['config']['is_num_cards_ascending'],
+            $roundData['config']['num_tricks'],
+            $roundData['config']['is_num_tricks_ascending'],
             $roundData['config']['next_player_index_to_bet'],
             $roundData['config']['next_player_index_to_play']
         ));
@@ -121,13 +126,8 @@ class RoundState extends AbstractState
 
         $round->setBets($roundData['bets']);
 
-        $plays = new CardCollection();
-
-        foreach ($roundData['plays'] as $index => $card) {
-            $plays->offsetSet($index, new CardState($card['suit'], $card['value']));
-        }
-
-        $round->setPlays($plays);
+        $round->setPreviousTricksFromArray($roundData['previous_tricks']);
+        $round->setCurrentTrickFromArray($roundData['current_trick']);
 
         return $round;
     }
@@ -137,7 +137,7 @@ class RoundState extends AbstractState
      */
     public function makeBetForNextPlayer(int $bet): void
     {
-        if ($bet < 0 || $bet > $this->numCards) {
+        if ($bet < 0 || $bet > $this->numTricks) {
             throw new InvalidBetAmountException();
         }
 
@@ -146,7 +146,7 @@ class RoundState extends AbstractState
 
     public function makePlayForNextPlayer(CardState $cardState): void
     {
-        $this->plays[$this->nextPlayerIndexToPlay] = $cardState;
+        $this->currentTrick->makePlayForPlayer($this->nextPlayerIndexToPlay, $cardState);
     }
 
     /**
@@ -158,9 +158,14 @@ class RoundState extends AbstractState
         $this->bets = $bets;
     }
 
-    public function setIsNumCardsAscending(bool $value): void
+    /**
+     * @param array $trickData
+     * @phpstan-param SerializedTrickState $trickData
+     * @return void
+     */
+    public function setCurrentTrickFromArray(array $trickData): void
     {
-        $this->isNumCardsAscending = $value;
+        $this->currentTrick = TrickState::loadFromSaveData($trickData);
     }
 
     public function setNextPlayerIndexToBet(int $index): void
@@ -173,9 +178,18 @@ class RoundState extends AbstractState
         $this->nextPlayerIndexToPlay = $index;
     }
 
-    public function setPlays(CardCollection $plays): void
+    /**
+     * @param array $tricksData
+     * @phpstan-param SerializedTrickState[] $tricksData
+     * @return void
+     */
+    public function setPreviousTricksFromArray(array $tricksData): void
     {
-        $this->plays = $plays;
+        $this->previousTricks = new TrickCollection();
+
+        foreach ($tricksData as $trickData) {
+            $this->previousTricks->add(TrickState::loadFromSaveData($trickData));
+        }
     }
 
     public function setTrumpCard(CardState $cardState): void

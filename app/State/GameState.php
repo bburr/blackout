@@ -50,26 +50,12 @@ class GameState extends AbstractState
         $this->previousRounds->add($roundScoreState);
     }
 
-    public function advanceBettingPlayerIndex(): void
-    {
-        $bettingPlayerIndex = $this->getCurrentRound()->getNextPlayerIndexToBet();
-
-        $this->getCurrentRound()->setNextPlayerIndexToBet($this->advancePlayerIndexUntilDealer($bettingPlayerIndex));
-    }
-
     public function advanceDealerIndex(): void
     {
         $this->dealerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
     }
 
-    public function advancePlayerIndex(): void
-    {
-        $playerIndex = $this->getCurrentRound()->getNextPlayerIndexToPlay();
-
-        $this->getCurrentRound()->setNextPlayerIndexToPlay($this->advancePlayerIndexUntilDealer($playerIndex));
-    }
-
-    protected function advancePlayerIndexUntilDealer(int $playerIndex): int
+    public function advancePlayerIndexUntilDealer(int $playerIndex): int
     {
         if ($playerIndex === $this->dealerIndex) {
             $playerIndex = -1;
@@ -160,7 +146,7 @@ class GameState extends AbstractState
 
         $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
 
-        Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumCards(), true));
+        Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumTricks(), true));
     }
 
     public function jsonSerialize()
@@ -190,25 +176,6 @@ class GameState extends AbstractState
         $this->currentRound = RoundState::loadFromSaveData($currentRoundData);
 
         // todo load previousRounds
-    }
-
-    // todo move to job
-    public function makePlayForNextPlayer(CardState $cardState): void
-    {
-        /** @var PlayerState $player */
-        $player = $this->getPlayerAtIndex($this->getCurrentRound()->getNextPlayerIndexToPlay());
-
-        $index = $player->getHand()->search($cardState);
-
-        if ($index === false) {
-            // todo exception
-            throw new \LogicException('Player does not have that card');
-        }
-
-        // todo business logic for valid card play
-        $this->getCurrentRound()->makePlayForNextPlayer($cardState);
-        $player->getHand()->forget($index);
-        $this->advancePlayerIndex();
     }
 
     public function save(): void

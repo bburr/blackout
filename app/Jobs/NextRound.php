@@ -24,23 +24,23 @@ class NextRound
         // todo score current round and save to $previousRounds
         $this->gameState->addPreviousRound(new RoundScoreState());
 
-        if ($currentRound->isNumCardsAscending()) {
-            $numCards = $currentRound->getNumCards() + 1;
+        if ($currentRound->isNumTricksAscending()) {
+            $numTricks = $currentRound->getNumTricks() + 1;
 
-            if ($numCards === $gameSettings->getMaxNumCards()) {
-                $isNumCardsAscending = false;
+            if ($numTricks === $gameSettings->getMaxNumTricks()) {
+                $isNumTricksAscending = false;
             }
         }
         else {
-            $numCards = $currentRound->getNumCards() - 1;
+            $numTricks = $currentRound->getNumTricks() - 1;
 
-            if ($numCards < $gameSettings->getEndingNumCards()) {
+            if ($numTricks < $gameSettings->getEndingNumTricks()) {
                 throw new GameIsCompleteException();
             }
         }
 
         $this->gameState->advanceDealerIndex();
 
-        Bus::dispatch(new StartRound($this->gameState, $currentRound->getRoundNumber() + 1, $numCards, $isNumCardsAscending ?? $currentRound->isNumCardsAscending()));
+        Bus::dispatch(new StartRound($this->gameState, $currentRound->getRoundNumber() + 1, $numTricks, $isNumTricksAscending ?? $currentRound->isNumTricksAscending()));
     }
 }

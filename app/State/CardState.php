@@ -16,6 +16,11 @@ class CardState extends AbstractState
         return static::listValues()[$this->valueKey] . ' of ' . static::listSuits()[$this->suitKey];
     }
 
+    public function getSuitKey(): string
+    {
+        return $this->suitKey;
+    }
+
     /**
      * @phpstan-return SerializedCardState
      * @return array
