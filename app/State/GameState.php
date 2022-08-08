@@ -59,16 +59,16 @@ class GameState extends AbstractState
 
     public function advancePlayerIndexUntilLeadingPlayer(int $playerIndex): int
     {
-        if ($playerIndex === $this->leadingPlayerIndex) {
-            $playerIndex = -1;
-        }
-
         if ($playerIndex >= 0) {
             $playerIndex++;
         }
 
         if ($playerIndex >= $this->players->count()) {
             $playerIndex = 0;
+        }
+
+        if ($playerIndex === $this->leadingPlayerIndex) {
+            $playerIndex = -1;
         }
 
         return $playerIndex;
@@ -98,6 +98,11 @@ class GameState extends AbstractState
     public function getGameSettings(): GameSettings
     {
         return $this->gameSettings ?? $this->gameSettings = new GameSettings();
+    }
+
+    public function getLeadingPlayerIndex(): int
+    {
+        return $this->leadingPlayerIndex;
     }
 
     public function getPlayerAtIndex(int $index): ?PlayerState
@@ -146,7 +151,8 @@ class GameState extends AbstractState
             $this->players->add(new PlayerState($user));
         }
 
-        $this->dealerIndex = $this->leadingPlayerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
+        $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
+        $this->leadingPlayerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
 
         Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumTricks(), true));
     }

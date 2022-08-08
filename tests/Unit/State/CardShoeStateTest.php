@@ -138,7 +138,6 @@ class CardShoeStateTest extends TestCase
      * @dataProvider dataLoadFromSaveData
      * @param int $numDecks
      * @return void
-     * @covers CardShoeState::setCardsFromArray()
      * @throws CardShoeIsEmptyException
      */
     public function testLoadFromSaveData(int $numDecks): void

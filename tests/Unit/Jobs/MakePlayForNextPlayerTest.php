@@ -207,6 +207,15 @@ class MakePlayForNextPlayerTest extends TestCase
         Bus::assertDispatched(NextTrick::class);
     }
 
+    /**
+     * @param GameState $gameState
+     * @param array $playerHand
+     * @phpstan-param SerializedCardCollection $playerHand
+     * @param array $cardData
+     * @phpstan-param SerializedCardState $cardData
+     * @return void
+     * @throws InvalidCardForPlayException
+     */
     protected function makePlay(GameState $gameState, array $playerHand, array $cardData): void
     {
         $playerState = new PlayerState(User::factory()->makeOne());

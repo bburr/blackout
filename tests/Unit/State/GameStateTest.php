@@ -23,6 +23,8 @@ class GameStateTest extends TestCase
 
         $this->assertGreaterThanOrEqual(0, $gameState->getDealerIndex());
         $this->assertLessThanOrEqual($numUsers - 1, $gameState->getDealerIndex());
+        $this->assertLessThanOrEqual($numUsers - 1, $gameState->getLeadingPlayerIndex());
+        $this->assertTrue($gameState->getDealerIndex() !== $gameState->getLeadingPlayerIndex());
         $this->assertInstanceOf(RoundState::class, $gameState->getCurrentRound());
         $this->assertEquals($numUsers, $gameState->getPlayers()->count());
         $this->assertInstanceOf(CardShoeState::class, $gameState->getCardShoeState());
@@ -74,9 +76,8 @@ class GameStateTest extends TestCase
     {
         $numUsers = 3;
         $gameState = $this->getBasicGameState($numUsers);
-        $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToBet());
-        $dealerIndex = $gameState->getDealerIndex();
-        $playerIndex = $gameState->getPlayerIndexAfter($dealerIndex);
+        $this->assertNotEquals(-1, $gameState->getCurrentRound()->getNextPlayerIndexToPlay());
+        $playerIndex = $gameState->getLeadingPlayerIndex();
 
         for ($i = 0; $i < $numUsers - 1; $i++) {
             $playerIndex = $gameState->advancePlayerIndexUntilLeadingPlayer($playerIndex);
