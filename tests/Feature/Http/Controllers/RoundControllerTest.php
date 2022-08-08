@@ -51,16 +51,6 @@ class RoundControllerTest extends AbstractFeatureTest
         $response->assertStatus(400);
     }
 
-    public function testStartNextRound(): void
-    {
-        $this->markTestIncomplete();
-    }
-
-    public function testStartNextRoundAsUser(): void
-    {
-        $this->markTestIncomplete();
-    }
-
     protected function addUserToLobby(string $lobbyId): string
     {
         $userResponse = $this->postJson('/api/v1/admin/user/create-other-user', [

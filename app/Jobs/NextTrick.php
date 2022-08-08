@@ -29,6 +29,8 @@ class NextTrick
         $this->gameState->getCurrentRound()->addPreviousTrick($currentTrick);
 
         if ($this->gameState->getCurrentRound()->isRoundDone()) {
+            Bus::dispatch(new NextRound($this->gameState));
+
             return;
         }
 
