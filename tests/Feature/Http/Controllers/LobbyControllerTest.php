@@ -8,21 +8,21 @@ class LobbyControllerTest extends AbstractFeatureTest
 {
     public function testCreateLobby(): void
     {
-        $this->postJson('/api/user/create-user', ['name' => 'Bob']);
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
 
-        $response = $this->postJson('/api/lobby/create-lobby');
+        $response = $this->postJson('/api/v1/lobby/create-lobby');
 
         $response->assertStatus(200);
     }
 
     public function testJoinLobby(): void
     {
-        $this->postJson('/api/user/create-user', ['name' => 'Bob']);
-        $lobbyResponse = $this->postJson('/api/lobby/create-lobby');
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
+        $lobbyResponse = $this->postJson('/api/v1/lobby/create-lobby');
 
-        $this->postJson('/api/user/create-user', ['name' => 'Jim']);
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Jim']);
 
-        $response = $this->postJson('/api/lobby/join-lobby', [
+        $response = $this->postJson('/api/v1/lobby/join-lobby', [
             'invite_code' => $lobbyResponse->json('invite_code'),
         ]);
 
@@ -32,14 +32,14 @@ class LobbyControllerTest extends AbstractFeatureTest
     // todo test with invite code
     public function testAddUserToLobby(): void
     {
-        $this->postJson('/api/user/create-user', ['name' => 'Bob']);
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
 
-        $lobbyResponse = $this->postJson('/api/lobby/create-lobby');
-        $userResponse = $this->postJson('/api/admin/user/create-other-user', [
+        $lobbyResponse = $this->postJson('/api/v1/lobby/create-lobby');
+        $userResponse = $this->postJson('/api/v1/admin/user/create-other-user', [
             'name' => 'Jim',
         ]);
 
-        $response = $this->postJson('api/admin/lobby/add-user-to-lobby', [
+        $response = $this->postJson('api/v1/admin/lobby/add-user-to-lobby', [
             'lobby_id' => $lobbyResponse->json('uuid'),
             'user_id' => $userResponse->json('uuid'),
         ]);

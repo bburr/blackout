@@ -8,7 +8,7 @@ class UserControllerTest extends AbstractFeatureTest
 {
     public function testCreateUser(): void
     {
-        $response = $this->postJson('/api/user/create-user', [
+        $response = $this->postJson('/api/v1/user/create-user', [
             'name' => 'Bob',
         ]);
 
@@ -17,7 +17,7 @@ class UserControllerTest extends AbstractFeatureTest
 
     public function testCreateOtherUser(): void
     {
-        $response = $this->postJson('/api/admin/user/create-other-user', [
+        $response = $this->postJson('/api/v1/admin/user/create-other-user', [
             'name' => 'Bob',
         ]);
 

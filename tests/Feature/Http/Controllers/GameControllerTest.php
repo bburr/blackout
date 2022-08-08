@@ -10,27 +10,27 @@ class GameControllerTest extends AbstractFeatureTest
     {
         $numPlayers = 3;
 
-        $this->postJson('/api/user/create-user', ['name' => 'Bob']);
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
 
-        $lobbyResponse = $this->postJson('/api/lobby/create-lobby');
+        $lobbyResponse = $this->postJson('/api/v1/lobby/create-lobby');
         $lobbyId = $lobbyResponse->json('uuid');
 
         for ($i = 0; $i < $numPlayers - 1; $i++) {
             $this->addUserToLobby($lobbyId);
         }
 
-        $response = $this->postJson('/api/game/start-game');
+        $response = $this->postJson('/api/v1/game/start-game');
 
         $response->assertStatus(200);
     }
 
     protected function addUserToLobby(string $lobbyId): void
     {
-        $userResponse = $this->postJson('/api/admin/user/create-other-user', [
+        $userResponse = $this->postJson('/api/v1/admin/user/create-other-user', [
             'name' => 'Jim',
         ]);
 
-        $this->postJson('api/admin/lobby/add-user-to-lobby', [
+        $this->postJson('api/v1/admin/lobby/add-user-to-lobby', [
             'lobby_id' => $lobbyId,
             'user_id' => $userResponse->json('uuid'),
         ]);

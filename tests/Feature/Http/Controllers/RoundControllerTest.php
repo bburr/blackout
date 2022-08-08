@@ -11,9 +11,9 @@ class RoundControllerTest extends AbstractFeatureTest
         $numPlayers = 3;
 
         $userIds = [];
-        $userIds[] = $this->postJson('/api/user/create-user', ['name' => 'Bob'])->json('uuid');
+        $userIds[] = $this->postJson('/api/v1/user/create-user', ['name' => 'Bob'])->json('uuid');
 
-        $lobbyResponse = $this->postJson('/api/lobby/create-lobby');
+        $lobbyResponse = $this->postJson('/api/v1/lobby/create-lobby');
         $lobbyResponse->assertStatus(200);
         $lobbyId = $lobbyResponse->json('uuid');
 
@@ -21,7 +21,7 @@ class RoundControllerTest extends AbstractFeatureTest
             $userIds[] = $this->addUserToLobby($lobbyId);
         }
 
-        $gameResponse = $this->postJson('/api/game/start-game');
+        $gameResponse = $this->postJson('/api/v1/game/start-game');
 
         $successfulResponses = [];
 
@@ -31,7 +31,7 @@ class RoundControllerTest extends AbstractFeatureTest
                     continue;
                 }
 
-                $response = $this->postJson('/api/admin/round/perform-bet-as-user', [
+                $response = $this->postJson('/api/v1/admin/round/perform-bet-as-user', [
                     'auth_user_id' => $userId,
                     'game_id' => $gameResponse->json('uuid'),
                     'bet' => 1,
@@ -43,7 +43,7 @@ class RoundControllerTest extends AbstractFeatureTest
             }
         }
 
-        $response = $this->postJson('/api/round/perform-bet', [
+        $response = $this->postJson('/api/v1/round/perform-bet', [
             'game_id' => $gameResponse->json('uuid'),
             'bet' => 1,
         ]);
@@ -63,13 +63,13 @@ class RoundControllerTest extends AbstractFeatureTest
 
     protected function addUserToLobby(string $lobbyId): string
     {
-        $userResponse = $this->postJson('/api/admin/user/create-other-user', [
+        $userResponse = $this->postJson('/api/v1/admin/user/create-other-user', [
             'name' => 'Jim',
         ]);
 
         $userId = $userResponse->json(('uuid'));
 
-        $this->postJson('api/admin/lobby/add-user-to-lobby', [
+        $this->postJson('api/v1/admin/lobby/add-user-to-lobby', [
             'lobby_id' => $lobbyId,
             'user_id' => $userId,
         ]);
