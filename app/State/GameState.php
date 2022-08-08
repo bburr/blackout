@@ -32,12 +32,12 @@ class GameState extends AbstractState
     protected Collection $players;
 
     /** @var Collection<int, RoundScoreState>  */
-    protected Collection $previousRounds;
+    protected Collection $previousRoundScores;
 
     public function __construct(protected Game $game, protected ?GameSettings $gameSettings)
     {
         $this->players = new Collection();
-        $this->previousRounds = new Collection();
+        $this->previousRoundScores = new Collection();
 
         $this->cacheHandler = app(GameStateCacheHandlerInterface::class, ['gameKey' => $this->game->getKey()]);
 
@@ -47,9 +47,9 @@ class GameState extends AbstractState
             : $this->initGame();
     }
 
-    public function addPreviousRound(RoundScoreState $roundScoreState): void
+    public function addPreviousRoundScore(RoundScoreState $roundScoreState): void
     {
-        $this->previousRounds->add($roundScoreState);
+        $this->previousRoundScores->add($roundScoreState);
     }
 
     public function advanceDealerIndex(): void
@@ -145,6 +145,14 @@ class GameState extends AbstractState
         }
     }
 
+    /**
+     * @return Collection<int, RoundScoreState>
+     */
+    public function getPreviousRoundScores(): Collection
+    {
+        return $this->previousRoundScores;
+    }
+
     protected function initGame(): void
     {
         foreach ($this->game->getUsers() as $user) {
@@ -185,7 +193,9 @@ class GameState extends AbstractState
         $currentRoundData = $this->cacheHandler->cacheGet(self::CURRENT_ROUND_CACHE_KEY);
         $this->currentRound = RoundState::loadFromSaveData($currentRoundData);
 
-        // todo load previousRounds
+        foreach ($this->cacheHandler->cacheGet(self::PREVIOUS_ROUNDS_CACHE_KEY) as $roundScoreStateData) {
+            $this->previousRoundScores->add(RoundScoreState::loadFromSaveData($roundScoreStateData));
+        }
     }
 
     public function save(): void
@@ -194,7 +204,7 @@ class GameState extends AbstractState
         $this->cacheHandler->cachePut(self::PLAYERS_CACHE_KEY, $this->players);
         $this->cacheHandler->cachePut(self::CARD_SHOE_CACHE_KEY, $this->shoe);
         $this->cacheHandler->cachePut(self::CURRENT_ROUND_CACHE_KEY, $this->currentRound);
-        $this->cacheHandler->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRounds);
+        $this->cacheHandler->cachePut(self::PREVIOUS_ROUNDS_CACHE_KEY, $this->previousRoundScores);
     }
 
     public function setCurrentRound(RoundState $roundState): void

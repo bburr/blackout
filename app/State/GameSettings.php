@@ -34,6 +34,12 @@ class GameSettings extends AbstractState
         return 1;
     }
 
+    public function getPointsForCorrectBet(): int
+    {
+        // todo
+        return 10;
+    }
+
     public function getStartingNumTricks(): int
     {
         // todo

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Jobs;
 
 use App\Exceptions\GameIsCompleteException;
+use App\Jobs\DetermineRoundScores;
 use App\Jobs\NextRound;
 use App\Jobs\StartRound;
 use App\State\GameSettings;
@@ -57,31 +58,31 @@ class NextRoundTest extends TestCase
             });
             $mock->shouldReceive('getGameSettings')->andReturn($gameSettings);
 
-            $mock->shouldReceive('addPreviousRound');
+            $mock->shouldReceive('addPreviousRoundScore');
             $mock->shouldReceive('advanceDealerIndex')->times($expectedNumTricks !== null ? 1 : 0);
         });
 
         $subject = new NextRound($gameState);
 
-        Bus::fake();
-
         if ($expectedNumTricks === null) {
             $this->expectException(GameIsCompleteException::class);
         }
 
-        $subject->handle();
+        Bus::shouldReceive('dispatch')->with(\Mockery::type(DetermineRoundScores::class))->andReturn([0, 0, 0]);
 
         if ($expectedNumTricks === null) {
-            Bus::assertNotDispatched(StartRound::class);
+            Bus::shouldReceive('dispatch')->with(\Mockery::type(StartRound::class))->times(0);
         }
         else {
-            Bus::assertDispatched(function (StartRound $job) use ($expectedRoundNumber, $expectedNumTricks, $expectedIsNumTricksAscending) {
+            Bus::shouldReceive('dispatch')->with(\Mockery::on(function (StartRound $job) use ($expectedRoundNumber, $expectedNumTricks, $expectedIsNumTricksAscending) {
                 $this->assertEquals($expectedRoundNumber, $this->getPropertyValueFromObject($job, 'roundNumber'));
                 $this->assertEquals($expectedNumTricks, $this->getPropertyValueFromObject($job, 'numTricks'));
                 $this->assertEquals($expectedIsNumTricksAscending, $this->getPropertyValueFromObject($job, 'isNumTricksAscending'));
 
                 return true;
-            });
+            }));
         }
+
+        $subject->handle();
     }
 }

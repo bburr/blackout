@@ -54,6 +54,8 @@ class RoundController extends Controller
         abort_unless($gameState->getCurrentRound()->isRoundDone(), Response::HTTP_BAD_REQUEST, 'The current round is not yet done');
 
         Bus::dispatch(new NextRound($gameState));
+
+        $gameState->save();
     }
 
     public function startNextRoundAsUser(StartNextRoundAsUser $request): void

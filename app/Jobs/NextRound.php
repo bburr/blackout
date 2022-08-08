@@ -21,8 +21,7 @@ class NextRound
         $currentRound = $this->gameState->getCurrentRound();
         $gameSettings = $this->gameState->getGameSettings();
 
-        // todo score current round and save to $previousRounds
-        $this->gameState->addPreviousRound(new RoundScoreState());
+        $this->gameState->addPreviousRoundScore(new RoundScoreState($currentRound->getRoundNumber(), Bus::dispatch(new DetermineRoundScores($currentRound, $gameSettings))));
 
         if ($currentRound->isNumTricksAscending()) {
             $numTricks = $currentRound->getNumTricks() + 1;
