@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->uuid();
             $table->uuid('lobby_uuid');
+            $table->uuid('winner_uuid')->nullable();
             $table->timestamps();
         });
     }

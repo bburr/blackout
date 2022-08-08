@@ -95,6 +95,11 @@ class GameState extends AbstractState
         return $this->dealerIndex;
     }
 
+    public function getGame(): Game
+    {
+        return $this->game;
+    }
+
     public function getGameSettings(): GameSettings
     {
         return $this->gameSettings ?? $this->gameSettings = new GameSettings();

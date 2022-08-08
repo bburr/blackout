@@ -40,4 +40,12 @@ class Game extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    /**
+     * @return BelongsTo<User, Game>
+     */
+    public function winner(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
