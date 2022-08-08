@@ -31,6 +31,9 @@ class NextTrickTest extends TestCase
 
         $subject->handle();
 
+        $this->assertEquals($nextLeaderIndex, $gameState->getCurrentRound()->getPreviousTricks()[0]?->getTrickWinnerIndex());
+        $this->assertCount(1, $gameState->getCurrentRound()->getPreviousTricks());
+        $this->assertCount(0, $gameState->getCurrentRound()->getCurrentTrick()->getPlays());
         $this->assertEquals($nextLeaderIndex, $gameState->getCurrentRound()->getNextPlayerIndexToPlay());
     }
 }

@@ -65,6 +65,11 @@ class RoundState extends AbstractState
         return $this->numTricks;
     }
 
+    public function getPreviousTricks(): TrickCollection
+    {
+        return $this->previousTricks;
+    }
+
     public function getRoundNumber(): int
     {
         return $this->roundNumber;
@@ -190,7 +195,7 @@ class RoundState extends AbstractState
 
     /**
      * @param array $tricksData
-     * @phpstan-param SerializedTrickState[] $tricksData
+     * @phpstan-param SerializedTrickCollection $tricksData
      * @return void
      */
     public function setPreviousTricksFromArray(array $tricksData): void

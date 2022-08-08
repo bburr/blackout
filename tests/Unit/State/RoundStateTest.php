@@ -48,11 +48,12 @@ class RoundStateTest extends TestCase
             ],
             'trump_card' => null,
             'bets' => [],
+            'previous_tricks' => [],
             'current_trick' => [
                 'leading_card' => null,
+                'trick_winner_index' => null,
                 'plays' => [],
             ],
-            'previous_tricks' => [],
         ]);
 
         $this->assertInstanceOf(RoundState::class, $round);
@@ -90,6 +91,7 @@ class RoundStateTest extends TestCase
             'previous_tricks' => [],
             'current_trick' => [
                 'leading_card' => ['suit' => 'H', 'value' => 10],
+                'trick_winner_index' => null,
                 'plays' => [
                     0 => ['suit' => 'H', 'value' => 10],
                 ],

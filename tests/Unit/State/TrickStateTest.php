@@ -29,15 +29,17 @@ class TrickStateTest extends TestCase
 
     public function testLoadFromSaveDataEmpty(): void
     {
-        $trickState = TrickState::loadFromSaveData(['leading_card' => null, 'plays' => []]);
+        $trickState = TrickState::loadFromSaveData(['leading_card' => null, 'trick_winner_index' => null, 'plays' => []]);
         $this->assertNull($trickState->getLeadingCard());
         $this->assertCount(0, $trickState->getPlays());
+        $this->assertNull($trickState->getTrickWinnerIndex());
     }
 
     public function testLoadFromSaveData(): void
     {
         $trickState = TrickState::loadFromSaveData([
             'leading_card' => ['suit' => 'S', 'value' => 12],
+            'trick_winner_index' => 1,
             'plays' => [
                 ['suit' => 'S', 'value' => 12],
             ],
@@ -45,6 +47,7 @@ class TrickStateTest extends TestCase
 
         $this->assertEquals('A of Spades', (string) $trickState->getLeadingCard());
         $this->assertCount(1, $trickState->getPlays());
+        $this->assertEquals(1, $trickState->getTrickWinnerIndex());
     }
 
     public function testMakePlayForPlayer(): void

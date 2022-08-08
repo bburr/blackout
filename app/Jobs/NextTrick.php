@@ -14,12 +14,6 @@ class NextTrick
     public function handle(): void
     {
         $currentTrick = $this->gameState->getCurrentRound()->getCurrentTrick();
-        $this->gameState->getCurrentRound()->addPreviousTrick($currentTrick);
-
-        if ($this->gameState->getCurrentRound()->isRoundDone()) {
-            return;
-        }
-
         $trumpCard = $this->gameState->getCurrentRound()->getTrumpCard();
         $leadingCard = $currentTrick->getLeadingCard();
         $plays = $currentTrick->getPlays();
@@ -29,6 +23,14 @@ class NextTrick
         }
 
         $trickWinnerIndex = Bus::dispatch(new DetermineTrickWinner($trumpCard, $leadingCard, $plays));
+
+        $this->gameState->getCurrentRound()->getCurrentTrick()->setTrickWinnerIndex($trickWinnerIndex);
+
+        $this->gameState->getCurrentRound()->addPreviousTrick($currentTrick);
+
+        if ($this->gameState->getCurrentRound()->isRoundDone()) {
+            return;
+        }
 
         $this->gameState->setLeadingPlayerIndex($trickWinnerIndex);
         $this->gameState->getCurrentRound()->newTrick();
