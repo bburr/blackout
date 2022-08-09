@@ -117,6 +117,7 @@ return [
         SwooleTW\Http\Server\Resetters\RebindRouterContainer::class,
         SwooleTW\Http\Server\Resetters\RebindViewContainer::class,
         SwooleTW\Http\Server\Resetters\ResetProviders::class,
+        App\Swoole\Resetters\ResetZiggy::class,
     ],
 
     /*
