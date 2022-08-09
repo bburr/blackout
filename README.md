@@ -2,7 +2,7 @@
 
 This is a web app for a card game called Blackout.
 
-### Game Rules
+## Game Rules
 
 Blackout is a card game that can be played by 2 to 7 players with a standard 52-card deck. 
 The Ace is the highest card, followed by the King, all the way down to the 2.
@@ -33,7 +33,7 @@ The winner is the player with the most points after all rounds have been played.
 
 todo: tie breaker
 
-### Rule Configurations
+## Rule Configurations
 
 The following aspects of the rules are intended to be configurable via the game settings:
 * Starting number of tricks
@@ -41,12 +41,12 @@ The following aspects of the rules are intended to be configurable via the game 
 * Ending number of tricks
 * Points for correct bet
 
-### Artisan Commands
+## Artisan Commands
 * `swoole:http start` - Start the Swoole HTTP server
 * `state:display {gameId}` - This will display various information about the state of the given game
 * `game:quickstart` - This will start a game and make bets for the first round, then output the game ID
 
-### Technologies in Use
+## Technologies in Use
 * [PHP 8.1](https://www.php.net/)
 * [Laravel 9](https://laravel.com/)
 * [Swoole](https://www.swoole.com/)
@@ -56,6 +56,6 @@ The following aspects of the rules are intended to be configurable via the game 
 * [Vite](https://vitejs.dev/)
 * [Tailwind](https://tailwindcss.com/)
 
-### Rules References
+## Rules References
 * http://www.catsatcards.com/Games/Blackout.html
 * https://www.classicgamesandpuzzles.com/Blackout.html
