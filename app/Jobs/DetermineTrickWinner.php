@@ -11,7 +11,6 @@ class DetermineTrickWinner
     {
     }
 
-    // todo can you play this with 2+ decks? how do you handle a winner if two people play the same card?
     public function handle(): int
     {
         $highestCard = $this->leadingCard;

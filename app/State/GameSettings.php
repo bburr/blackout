@@ -18,19 +18,16 @@ class GameSettings extends AbstractState
 
     public function getMaxPlayers(): int
     {
-        // todo
-        return 5;
+        return 7;
     }
 
     public function getMinPlayers(): int
     {
-        // todo
-        return 3;
+        return 2;
     }
 
     public function getNumDecks(): int
     {
-        // todo
         return 1;
     }
 
