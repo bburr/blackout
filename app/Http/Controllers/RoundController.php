@@ -19,7 +19,7 @@ class RoundController extends Controller
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         abort_if($gameState->getCurrentRound()->isBettingDone(), Response::HTTP_BAD_REQUEST, 'Betting is done for current round');
 

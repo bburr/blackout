@@ -21,7 +21,7 @@ class DisplayGameStateCommand extends Command
             throw new \LogicException('Game not found');
         }
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
         $currentRound = $gameState->getCurrentRound();
 
         $bettingPlayer = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToBet());

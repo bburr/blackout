@@ -18,7 +18,7 @@ class PlayerController extends Controller
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         $player = $gameState->getPlayers()->firstWhere(fn (PlayerState $playerState) => $playerState->getUser()->getKey() === $request->get('auth_user_id'));
 

@@ -39,7 +39,11 @@ class QuickStartGameCommand extends Command
         $lobbyUserIds = $lobby->users()->pluck('uuid');
         $game->users()->sync($lobbyUserIds);
 
-        $gameState = (new GameState($game, new GameSettings()));
+        $gameState = (new GameState($game, [
+            'starting_num_tricks' => 1,
+            'max_num_tricks' => 5,
+            'ending_num_tricks' => 1,
+        ]));
 
         for ($i = 0; $i < count($names); $i++) {
             Bus::dispatch(new MakeBetForNextPlayer($gameState, 1));

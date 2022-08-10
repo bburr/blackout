@@ -86,7 +86,9 @@ class DetermineRoundScoresTest extends TestCase
         $roundState->setBets($betsData);
         $roundState->setPreviousTricksFromArray($trickData);
 
-        $subject = new DetermineRoundScores($roundState, new GameSettings());
+        $subject = new DetermineRoundScores($roundState, new GameSettings(count($betsData), [
+            'points_for_correct_bet' => 10,
+        ]));
 
         $this->assertEquals($expectedScores, $subject->handle());
     }

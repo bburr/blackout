@@ -22,7 +22,7 @@ class TrickController extends Controller
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         abort_unless($gameState->getCurrentRound()->isBettingDone(), Response::HTTP_BAD_REQUEST, 'Betting is still ongoing for current round');
 

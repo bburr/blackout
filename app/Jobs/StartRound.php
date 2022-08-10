@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\State\CardShoeState;
+use App\State\GameSettings;
 use App\State\GameState;
 use App\State\RoundState;
 use Illuminate\Support\Facades\Bus;
@@ -26,7 +27,7 @@ class StartRound
             $playerIndexAfterDealer
         ));
 
-        $this->gameState->setShoe(new CardShoeState($this->gameState->getGameSettings()->getNumDecks()));
+        $this->gameState->setShoe(new CardShoeState(GameSettings::getNumDecks()));
 
         Bus::dispatch(new DealForRound($this->gameState));
     }

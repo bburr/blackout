@@ -56,7 +56,7 @@ class FinishGameTest extends TestCase
             $mock->shouldReceive('save');
         });
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         foreach ($scoresData as $i => $scoreData) {
             $gameState->addPreviousRoundScore(new RoundScoreState($i + 1, $scoreData));

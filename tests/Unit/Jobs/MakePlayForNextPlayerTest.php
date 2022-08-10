@@ -147,7 +147,7 @@ class MakePlayForNextPlayerTest extends TestCase
             $mock->shouldReceive('getUsers')->andReturn(new Collection(User::factory(3)->make()));
         });
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         if ($leadingCardData !== null) {
             $leadingCard = new CardState($leadingCardData['suit'], $leadingCardData['value']);
@@ -192,7 +192,7 @@ class MakePlayForNextPlayerTest extends TestCase
             $mock->shouldReceive('getUsers')->andReturn(new Collection(User::factory(3)->make()));
         });
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         Bus::fake();
 

@@ -46,13 +46,25 @@ class GameStateTest extends TestCase
                     'next_player_index_to_bet' => 0,
                     'next_player_index_to_play' => 0,
                 ],
+                'trump_card' => null,
                 'bets' => [],
-                'current_trick' => ['plays' => []],
                 'previous_tricks' => [],
+                'current_trick' => [
+                    'leading_card' => null,
+                    'trick_winner_index' => null,
+                    'plays' => [],
+                ],
             ],
             GameState::GAME_STATE_CACHE_KEY . $gameKey => [
+                'game_id' => $gameKey,
                 'dealer_index' => 0,
                 'leading_player_index' => 0,
+                'settings' => [
+                    'ending_num_tricks' => 1,
+                    'max_num_tricks' => 5,
+                    'points_for_correct_bet' => 10,
+                    'starting_num_tricks' => 1,
+                ],
             ],
             GameState::PLAYERS_CACHE_KEY . $gameKey => [
                 (new PlayerState(User::factory()->makeOne()))->jsonSerialize(),
@@ -66,10 +78,21 @@ class GameStateTest extends TestCase
             $mock->shouldReceive('getKey')->andReturn($gameKey);
         });
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
-        // todo
-        $this->markTestIncomplete('waiting to add assertions until more loading logic is implemented');
+        $this->assertCount(3, $gameState->getPlayers()->toArray());
+        // todo add more assertions
+    }
+
+    public function testAdvanceDealerIndex(): void
+    {
+        $numUsers = 3;
+        $gameState = $this->getBasicGameState($numUsers);
+
+        for ($i = 0; $i < $numUsers * 10; $i++) {
+            $gameState->advanceDealerIndex();
+            $this->assertNotEquals(-1, $gameState->getDealerIndex());
+        }
     }
 
     public function testAdvancePlayerIndexUntilLeadingPlayer(): void
@@ -86,17 +109,6 @@ class GameStateTest extends TestCase
 
         $playerIndex = $gameState->advancePlayerIndexUntilLeadingPlayer($playerIndex);
         $this->assertEquals(-1, $playerIndex);
-    }
-
-    public function testAdvanceDealerIndex(): void
-    {
-        $numUsers = 3;
-        $gameState = $this->getBasicGameState($numUsers);
-
-        for ($i = 0; $i < $numUsers * 10; $i++) {
-            $gameState->advanceDealerIndex();
-            $this->assertNotEquals(-1, $gameState->getDealerIndex());
-        }
     }
 
     public function testGetPlayerIndexAfter(): void
@@ -143,6 +155,6 @@ class GameStateTest extends TestCase
             $mock->shouldReceive('getUsers')->andReturn(new Collection(User::factory($numUsers)->make()));
         });
 
-        return new GameState($game, null);
+        return new GameState($game);
     }
 }

@@ -43,9 +43,9 @@ todo: tie breaker
 ## Rule Configurations
 
 The following aspects of the rules are intended to be configurable via the game settings:
-* Starting number of tricks
+* Starting number of tricks (must be <= max number of tricks)
 * Maximum number of tricks
-* Ending number of tricks
+* Ending number of tricks (must be <= max number of tricks)
 * Points for correct bet
 * (Configurable per round) Draw a trump card for the round [NYI]
 

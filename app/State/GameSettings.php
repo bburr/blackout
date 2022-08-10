@@ -2,50 +2,105 @@
 
 namespace App\State;
 
+use App\Exceptions\InvalidTrickNumberSettingsException;
+
+/**
+ * @phpstan-consistent-constructor
+ * @phpstan-type SerializedGameSettings array{ending_num_tricks: int, max_num_tricks: int, points_for_correct_bet: int, starting_num_tricks: int}
+ * @phpstan-type InputGameSettings array{ending_num_tricks?: int, max_num_tricks?: int, points_for_correct_bet?: int, starting_num_tricks?: int}
+ */
 class GameSettings extends AbstractState
 {
+    protected int $endingNumTricks;
+    protected int $maxNumTricks;
+    protected int $pointsForCorrectBet;
+    protected int $startingNumTricks;
+
+    /**
+     * @param int $numPlayers
+     * @param array $settings
+     * @phpstan-param SerializedGameSettings|InputGameSettings $settings
+     * @throws InvalidTrickNumberSettingsException
+     */
+    public function __construct(int $numPlayers, array $settings = [])
+    {
+        $this->endingNumTricks = $settings['ending_num_tricks'] ?? 1;
+        $maxPossibleTricks = $this->getMaxPossibleTricks($numPlayers);
+        $this->maxNumTricks = isset($settings['max_num_tricks']) ? min($settings['max_num_tricks'], $maxPossibleTricks) : $maxPossibleTricks;
+        $this->pointsForCorrectBet = $settings['points_for_correct_bet'] ?? 10;
+        $this->startingNumTricks = $settings['starting_num_tricks'] ?? 1;
+
+        if ($this->startingNumTricks > $this->maxNumTricks) {
+            throw new InvalidTrickNumberSettingsException('starting');
+        }
+
+        if ($this->endingNumTricks > $this->maxNumTricks) {
+            throw new InvalidTrickNumberSettingsException('ending');
+        }
+    }
+
     public function getEndingNumTricks(): int
     {
-        // todo
-        return 3;
+        return $this->endingNumTricks;
     }
 
     public function getMaxNumTricks(): int
     {
-        // todo
-        return 5;
+        return $this->maxNumTricks;
     }
 
-    public function getMaxPlayers(): int
+    public static function getMaxPlayers(): int
     {
         return 7;
     }
 
-    public function getMinPlayers(): int
+    public function getMaxPossibleTricks(int $numPlayers): int
+    {
+        return (int) ((static::getNumDecks() * CardShoeState::NUM_CARDS_PER_DECK) / $numPlayers);
+    }
+
+    public static function getMinPlayers(): int
     {
         return 2;
     }
 
-    public function getNumDecks(): int
+    public static function getNumDecks(): int
     {
         return 1;
     }
 
     public function getPointsForCorrectBet(): int
     {
-        // todo
-        return 10;
+        return $this->pointsForCorrectBet;
     }
 
     public function getStartingNumTricks(): int
     {
-        // todo
-        return 3;
+        return $this->startingNumTricks;
     }
 
-    public function jsonSerialize()
+    /**
+     * @phpstan-return SerializedGameSettings
+     */
+    public function jsonSerialize(): array
     {
-        // todo
-        return [];
+        return [
+            'ending_num_tricks' => $this->endingNumTricks,
+            'max_num_tricks' => $this->maxNumTricks,
+            'points_for_correct_bet' => $this->pointsForCorrectBet,
+            'starting_num_tricks' => $this->startingNumTricks,
+        ];
+    }
+
+    /**
+     * @param int $numPlayers
+     * @param array $gameSettingsData
+     * @phpstan-param SerializedGameSettings $gameSettingsData
+     * @return static
+     * @throws InvalidTrickNumberSettingsException
+     */
+    public static function loadFromSaveData(int $numPlayers, array $gameSettingsData): static
+    {
+        return new static($numPlayers, $gameSettingsData);
     }
 }

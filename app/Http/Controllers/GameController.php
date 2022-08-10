@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidGameSettingsException;
 use App\Http\Requests\Game\StartGame;
 use App\Models\Game;
 use App\Models\Lobby;
@@ -18,11 +19,8 @@ class GameController extends Controller
         // check for current lobby key
         abort_unless(Session::has(Lobby::CACHE_KEY_CURRENT_LOBBY_ID), Response::HTTP_BAD_REQUEST, 'No lobby found');
 
-        // todo check settings
-        $gameSettings = new GameSettings();
-
-        $minPlayers = $gameSettings->getMinPlayers();
-        $maxPlayers = $gameSettings->getMaxPlayers();
+        $minPlayers = GameSettings::getMinPlayers();
+        $maxPlayers = GameSettings::getMaxPlayers();
 
         // get lobby
         $lobbyId = Session::get(Lobby::CACHE_KEY_CURRENT_LOBBY_ID);
@@ -54,7 +52,15 @@ class GameController extends Controller
         $lobbyUserIds = $lobbyUsers->pluck('uuid');
         $game->users()->sync($lobbyUserIds);
 
-        (new GameState($game, $gameSettings))->save();
+        try {
+            (new GameState($game, $request->getGameSettings()))
+                ->save();
+        }
+        catch (InvalidGameSettingsException $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ])->setStatusCode(Response::HTTP_BAD_REQUEST);
+        }
 
         // todo send websocket msg to other players
 

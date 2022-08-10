@@ -2,6 +2,7 @@
 
 namespace App\State;
 
+use App\Exceptions\InvalidTrickNumberSettingsException;
 use App\Jobs\DetermineDealer;
 use App\Jobs\StartRound;
 use App\Models\Game;
@@ -10,6 +11,11 @@ use Generator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 
+/**
+ * @phpstan-import-type InputGameSettings from GameSettings
+ * @phpstan-import-type SerializedGameSettings from GameSettings
+ * @phpstan-type SerializedGameState array{game_id: string, dealer_index: int, leading_player_index: int, settings: SerializedGameSettings}
+ */
 class GameState extends AbstractState
 {
     const CARD_SHOE_CACHE_KEY = 'game-shoe-';
@@ -24,6 +30,8 @@ class GameState extends AbstractState
 
     protected int $dealerIndex;
 
+    protected GameSettings $gameSettings;
+
     protected int $leadingPlayerIndex;
 
     protected CardShoeState $shoe;
@@ -34,7 +42,11 @@ class GameState extends AbstractState
     /** @var Collection<int, RoundScoreState>  */
     protected Collection $previousRoundScores;
 
-    public function __construct(protected Game $game, protected ?GameSettings $gameSettings)
+    /**
+     * @phpstan-param InputGameSettings $settings
+     * @throws InvalidTrickNumberSettingsException
+     */
+    public function __construct(protected Game $game, array $settings = [])
     {
         $this->players = new Collection();
         $this->previousRoundScores = new Collection();
@@ -44,7 +56,7 @@ class GameState extends AbstractState
         // check for existing game
         $this->cacheHandler->cacheHas(self::GAME_STATE_CACHE_KEY)
             ? $this->loadGame()
-            : $this->initGame();
+            : $this->initGame($settings);
     }
 
     public function addPreviousRoundScore(RoundScoreState $roundScoreState): void
@@ -57,6 +69,7 @@ class GameState extends AbstractState
         $this->dealerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
     }
 
+    // todo move leading player into RoundState?
     public function advancePlayerIndexUntilLeadingPlayer(int $playerIndex): int
     {
         if ($playerIndex >= 0) {
@@ -102,7 +115,7 @@ class GameState extends AbstractState
 
     public function getGameSettings(): GameSettings
     {
-        return $this->gameSettings ?? $this->gameSettings = new GameSettings();
+        return $this->gameSettings;
     }
 
     public function getLeadingPlayerIndex(): int
@@ -158,11 +171,17 @@ class GameState extends AbstractState
         return $this->previousRoundScores;
     }
 
-    protected function initGame(): void
+    /**
+     * @phpstan-param InputGameSettings $settings
+     * @throws InvalidTrickNumberSettingsException
+     */
+    protected function initGame(array $settings): void
     {
         foreach ($this->game->getUsers() as $user) {
             $this->players->add(new PlayerState($user));
         }
+
+        $this->gameSettings = new GameSettings($this->players->count(), $settings);
 
         $this->dealerIndex = Bus::dispatch(new DetermineDealer($this->players->keys()->toArray()));
         $this->leadingPlayerIndex = $this->getPlayerIndexAfter($this->dealerIndex);
@@ -170,7 +189,10 @@ class GameState extends AbstractState
         Bus::dispatch(new StartRound($this, 1, $this->getGameSettings()->getStartingNumTricks(), true));
     }
 
-    public function jsonSerialize()
+    /**
+     * @phpstan-return SerializedGameState
+     */
+    public function jsonSerialize(): array
     {
         return [
             'game_id' => $this->game->getKey(),
@@ -180,17 +202,20 @@ class GameState extends AbstractState
         ];
     }
 
+    /**
+     * @throws InvalidTrickNumberSettingsException
+     */
     protected function loadGame(): void
     {
         $gameStateData = $this->cacheHandler->cacheGet(self::GAME_STATE_CACHE_KEY);
         $this->dealerIndex = $gameStateData['dealer_index'];
         $this->leadingPlayerIndex = $gameStateData['leading_player_index'];
-        // todo load settings
-        $this->gameSettings = (new GameSettings());
 
         foreach ($this->cacheHandler->cacheGet(self::PLAYERS_CACHE_KEY) as $playerData) {
             $this->players->add(PlayerState::loadFromSaveData($playerData));
         }
+
+        $this->gameSettings = GameSettings::loadFromSaveData($this->players->count(), $gameStateData['settings']);
 
         $cardShoeData = $this->cacheHandler->cacheGet(self::CARD_SHOE_CACHE_KEY);
         $this->shoe = CardShoeState::loadFromSaveData($cardShoeData);

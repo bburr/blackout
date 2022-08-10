@@ -20,7 +20,7 @@ class MakeBetForNextPlayerTest extends TestCase
             $mock->shouldReceive('getUsers')->andReturn(new Collection(User::factory(3)->make()));
         });
 
-        $gameState = new GameState($game, null);
+        $gameState = new GameState($game);
 
         $subject = new MakeBetForNextPlayer($gameState, $bet);
 

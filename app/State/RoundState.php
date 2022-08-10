@@ -214,7 +214,7 @@ class RoundState extends AbstractState
 
     public function shouldDrawTrumpCard(): bool
     {
-        // todo check gameSettings?
+        // todo add configuration to game settings - per round config of having trump card or not
         return true;
     }
 }
