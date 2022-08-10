@@ -13,6 +13,8 @@ use App\State\Collections\CardCollection;
  */
 class CardShoeState extends AbstractState
 {
+    const NUM_CARDS_PER_DECK = 52;
+
     /** @var CardCollection<int, CardState> */
     protected CardCollection $cards;
 

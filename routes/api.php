@@ -39,5 +39,5 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('round/perform-bet-as-user', [RoundController::class, 'performBetAsUser']);
     Route::post('round/start-next-round-as-user', [RoundController::class, 'startNextRoundAsUser']);
     Route::post('trick/play-card-as-user', [TrickController::class, 'playCardAsUser']);
-    Route::get('player/get-user-hand', [PlayerController::class, 'getUserHand']);
+    Route::get('player/get-hand-as-user', [PlayerController::class, 'getHandAsUser']);
 });

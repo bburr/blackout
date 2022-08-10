@@ -46,4 +46,21 @@ class LobbyControllerTest extends AbstractFeatureTest
 
         $response->assertStatus(200);
     }
+
+    public function testAddUserToLobbyInviteCode(): void
+    {
+        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
+
+        $lobbyResponse = $this->postJson('/api/v1/lobby/create-lobby');
+        $userResponse = $this->postJson('/api/v1/admin/user/create-other-user', [
+            'name' => 'Jim',
+        ]);
+
+        $response = $this->postJson('api/v1/admin/lobby/add-user-to-lobby', [
+            'invite_code' => $lobbyResponse->json('invite_code'),
+            'user_id' => $userResponse->json('uuid'),
+        ]);
+
+        $response->assertStatus(200);
+    }
 }

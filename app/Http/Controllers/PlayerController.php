@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Player\GetHand;
-use App\Http\Requests\Player\GetUserHand;
+use App\Http\Requests\Player\GetHandAsUser;
 use App\Models\Game;
 use App\State\GameState;
 use App\State\PlayerState;
@@ -27,7 +27,7 @@ class PlayerController extends Controller
         return response()->json($player->getHand());
     }
 
-    public function getUserHand(GetUserHand $request): Response
+    public function getHandAsUser(GetHandAsUser $request): Response
     {
         return $this->getHand($request);
     }

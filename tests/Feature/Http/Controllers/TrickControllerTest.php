@@ -22,11 +22,13 @@ class TrickControllerTest extends AbstractFeatureTest
         }
 
         $gameResponse = $this->postJson('/api/v1/game/start-game');
+        $gameId = $gameResponse->json('uuid');
 
+        $leadingPlayerIndex = null;
         $successfulResponses = [];
 
         while (count($successfulResponses) < $numPlayers) {
-            foreach ($userIds as $userId) {
+            foreach ($userIds as $playerIndex => $userId) {
                 if (isset($successfulResponses[$userId])) {
                     continue;
                 }
@@ -38,12 +40,29 @@ class TrickControllerTest extends AbstractFeatureTest
                 ]);
 
                 if ($response->status() === 200) {
+                    $leadingPlayerIndex = $leadingPlayerIndex ?? $playerIndex;
                     $successfulResponses[$userId] = true;
                 }
             }
         }
 
+        $playerIndex = $leadingPlayerIndex;
 
+        do {
+            $card = $this->getCardFromHand($gameId, $userIds[$playerIndex]);
+
+            $api = $playerIndex === 0 ? '/api/v1/trick/play-card' : '/api/v1/admin/trick/play-card-as-user';
+
+            $response = $this->postJson($api, array_merge([
+                'game_id' => $gameId,
+                'card_suit' => $card['suit'],
+                'card_value' => $card['value'],
+            ], $playerIndex !== 0 ? ['auth_user_id' => $userIds[$playerIndex]] : []));
+
+            $response->assertStatus(200);
+
+            $playerIndex = $this->getNextPlayerIndex($numPlayers, $playerIndex);
+        } while ($playerIndex !== $leadingPlayerIndex);
     }
 
     protected function addUserToLobby(string $lobbyId): string
@@ -60,5 +79,23 @@ class TrickControllerTest extends AbstractFeatureTest
         ]);
 
         return $userId;
+    }
+
+    protected function getCardFromHand(string $gameId, string $userId): array
+    {
+        $handResponse = $this->getJson(sprintf('/api/v1/admin/player/get-hand-as-user?game_id=%s&auth_user_id=%s', $gameId, $userId));
+
+        return $handResponse->json()[0];
+    }
+
+    protected function getNextPlayerIndex(int $numPlayers, int $playerIndex): int
+    {
+        $playerIndex++;
+
+        if ($playerIndex === $numPlayers) {
+            $playerIndex = 0;
+        }
+
+        return $playerIndex;
     }
 }

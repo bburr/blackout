@@ -10,8 +10,6 @@ use Tests\TestCase;
 
 class CardShoeStateTest extends TestCase
 {
-    const NUM_CARDS_PER_DECK = 52;
-
     /**
      * @var array<string, int>
      */
@@ -53,7 +51,7 @@ class CardShoeStateTest extends TestCase
         /** @var CardCollection $cards */
         $cards = $this->getPropertyValueFromObject($cardShoe, 'cards');
         $this->assertInstanceOf(CardCollection::class, $cards);
-        $this->assertEquals($numDecks * self::NUM_CARDS_PER_DECK, $cards->count());
+        $this->assertEquals($numDecks * CardShoeState::NUM_CARDS_PER_DECK, $cards->count());
 
         /** @var CardState $card */
         foreach ($cards as $card) {
@@ -85,7 +83,7 @@ class CardShoeStateTest extends TestCase
     {
         $cardShoe = new CardShoeState($numDecks);
 
-        for ($i = 0; $i < self::NUM_CARDS_PER_DECK * $numDecks; $i++) {
+        for ($i = 0; $i < CardShoeState::NUM_CARDS_PER_DECK * $numDecks; $i++) {
             $card = $cardShoe->dealCardOut();
             $this->addCardForUniquenessCheck($card);
         }
@@ -110,7 +108,7 @@ class CardShoeStateTest extends TestCase
             $this->assertEquals($numDecks, $amount);
         }
 
-        $this->assertCount(self::NUM_CARDS_PER_DECK, $this->uniqueCards);
+        $this->assertCount(CardShoeState::NUM_CARDS_PER_DECK, $this->uniqueCards);
     }
 
     public function testLoadFromSaveDataEmpty(): void
@@ -151,7 +149,7 @@ class CardShoeStateTest extends TestCase
         /** @var CardCollection $cards */
         $cards = $this->getPropertyValueFromObject($loadedCardShoe, 'cards');
         $this->assertInstanceOf(CardCollection::class, $cards);
-        $this->assertEquals($numDecks * self::NUM_CARDS_PER_DECK, $cards->count());
+        $this->assertEquals($numDecks * CardShoeState::NUM_CARDS_PER_DECK, $cards->count());
 
         /** @var CardState $card */
         foreach ($cards as $card) {
@@ -160,7 +158,7 @@ class CardShoeStateTest extends TestCase
 
         $this->checkCardUniqueness($numDecks);
 
-        for ($i = 0; $i < $numDecks * self::NUM_CARDS_PER_DECK; $i++) {
+        for ($i = 0; $i < $numDecks * CardShoeState::NUM_CARDS_PER_DECK; $i++) {
             $card1 = $cardShoe->dealCardOut();
             $card2 = $loadedCardShoe->dealCardOut();
 

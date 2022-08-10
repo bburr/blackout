@@ -47,6 +47,7 @@ The following aspects of the rules are intended to be configurable via the game 
 * Maximum number of tricks
 * Ending number of tricks
 * Points for correct bet
+* (Configurable per round) Draw a trump card for the round [NYI]
 
 ## Artisan Commands
 * `swoole:http start` - Start the Swoole HTTP server
