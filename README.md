@@ -64,6 +64,9 @@ The following aspects of the rules are intended to be configurable via the game 
 * [Vite](https://vitejs.dev/)
 * [Tailwind](https://tailwindcss.com/)
 
+## Game Design
+* [Miro board](https://miro.com/app/board/uXjVOgMM-UI=/)
+
 ## Rules References
 * http://www.catsatcards.com/Games/Blackout.html
 * https://www.classicgamesandpuzzles.com/Blackout.html
