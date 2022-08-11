@@ -23,7 +23,6 @@ Route::group(['middleware' => [HandleSessionUser::class]], function () {
 
     // Round
     Route::post('round/perform-bet', [RoundController::class, 'performBet']);
-    Route::post('round/start-next-round', [RoundController::class, 'startNextRound']);
 
     // Trick
     Route::post('trick/play-card', [TrickController::class, 'playCard']);
@@ -37,7 +36,6 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('user/create-other-user', [UserController::class, 'createOtherUser']);
     Route::post('lobby/add-user-to-lobby', [LobbyController::class, 'addUserToLobby']);
     Route::post('round/perform-bet-as-user', [RoundController::class, 'performBetAsUser']);
-    Route::post('round/start-next-round-as-user', [RoundController::class, 'startNextRoundAsUser']);
     Route::post('trick/play-card-as-user', [TrickController::class, 'playCardAsUser']);
     Route::get('player/get-hand-as-user', [PlayerController::class, 'getHandAsUser']);
 });

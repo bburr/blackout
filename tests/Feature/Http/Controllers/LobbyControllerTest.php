@@ -29,7 +29,6 @@ class LobbyControllerTest extends AbstractFeatureTest
         $response->assertStatus(200);
     }
 
-    // todo test with invite code
     public function testAddUserToLobby(): void
     {
         $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);

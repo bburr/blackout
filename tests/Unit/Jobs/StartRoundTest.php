@@ -21,6 +21,7 @@ class StartRoundTest extends TestCase
             $mock->shouldReceive('getPlayerIndexAfter')->andReturn(1);
         });
 
+        // todo test setLeadingPlayerIndex
         $subject = new StartRound($gameState, $roundNumber, $numTricks, $isNumTricksAscending);
 
         $this->expectsJobs(DealForRound::class);

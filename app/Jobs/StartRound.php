@@ -27,6 +27,8 @@ class StartRound
             $playerIndexAfterDealer
         ));
 
+        $this->gameState->setLeadingPlayerIndex($playerIndexAfterDealer);
+
         $this->gameState->setShoe(new CardShoeState(GameSettings::getNumDecks()));
 
         Bus::dispatch(new DealForRound($this->gameState));

@@ -16,6 +16,8 @@ class GameSettings extends AbstractState
     protected int $pointsForCorrectBet;
     protected int $startingNumTricks;
 
+    // todo per round(?) setting for dealer's bet cannot make sum of bets equal to number of tricks
+
     /**
      * @param int $numPlayers
      * @param array $settings
