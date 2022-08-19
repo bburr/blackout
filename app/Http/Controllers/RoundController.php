@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BetWasMade;
 use App\Http\Requests\Round\PerformBet;
 use App\Http\Requests\Round\PerformBetAsUser;
 use App\Jobs\MakeBetForNextPlayer;
@@ -32,6 +33,8 @@ class RoundController extends Controller
         Bus::dispatch(new MakeBetForNextPlayer($gameState, $request->get('bet')));
 
         $gameState->save();
+
+        broadcast(new BetWasMade($game))->toOthers();
 
         return Redirect::route('game', ['game' => $game->getKey()]);
     }

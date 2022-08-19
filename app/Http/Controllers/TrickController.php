@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CardWasPlayed;
 use App\Exceptions\GameIsCompleteException;
 use App\Http\Requests\Trick\PlayCard;
 use App\Http\Requests\Trick\PlayCardAsUser;
@@ -40,6 +41,8 @@ class TrickController extends Controller
         }
 
         $gameState->save();
+
+        broadcast(new CardWasPlayed($game))->toOthers();
 
         return Redirect::route('game', ['game' => $game->getKey()]);
     }

@@ -10,6 +10,7 @@ import JetInput from "@/Jetstream/Input";
 import JetLabel from "@/Jetstream/Label";
 import MakeBetForm from "@/Domains/Game/MakeBetForm";
 import PlayerHand from "@/Domains/Player/PlayerHand";
+import {Inertia} from "@inertiajs/inertia";
 
 interface Card {
     suit: string;
@@ -63,12 +64,14 @@ export default function Game({
     playerHand,
     scoreTotals,
 }: PropsWithChildren<Props>) {
-    // (window as any).Echo.channel(`game.${gameId}`)
-    //     .listen();
+    function reload() {
+        Inertia.reload({preserveState: false});
+    }
 
-    // EchoClient.getInstance()
-    //     .channel(`game.${gameId}`)
-    //     .listen('');
+    EchoClient.getInstance()
+        .channel(`game.${gameId}`)
+        .listen('BetWasMade', reload)
+        .listen('CardWasPlayed', reload);
 
     let playerList = [];
     let scoreList = [];
@@ -76,7 +79,7 @@ export default function Game({
     for (const player of players) {
         playerList.push(
             <li key={player.index + '-round'}>
-                {player.name} | Bet: {currentRound.bets[player.index]} | Tricks: {currentRound.tricksWon[player.index]} | Played: {currentRound.currentTrick.plays[player.index].str}
+                {player.name} | Bet: {currentRound.bets[player.index]} | Tricks: {currentRound.tricksWon[player.index]} | Played: {currentRound.currentTrick.plays[player.index]?.str}
             </li>
         );
 
