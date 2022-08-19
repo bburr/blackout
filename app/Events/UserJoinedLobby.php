@@ -5,12 +5,9 @@ namespace App\Events;
 use App\Models\Lobby;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Foundation\Events\Dispatchable;
 
 class UserJoinedLobby extends BroadcastEvent
 {
-    use Dispatchable;
-
     public string $lobbyId;
     public string $userId;
     public string $userName;

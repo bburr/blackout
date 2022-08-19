@@ -128,8 +128,7 @@ class GameController extends Controller
             ])->setStatusCode(Response::HTTP_BAD_REQUEST);
         }
 
-//        broadcast(new GameStarted($lobby, $game))->toOthers();
-        GameStarted::dispatch($lobby, $game);
+        broadcast(new GameStarted($lobby, $game))->toOthers();
 
         return Redirect::route('game', ['game' => $game->getKey()]);
     }
