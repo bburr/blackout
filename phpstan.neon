@@ -3,3 +3,5 @@ parameters:
     paths:
         - app
         - tests
+    ignoreErrors:
+        - '#Call to an undefined static method Illuminate\\Support\\Facades\\Route::inertia\(\)#'

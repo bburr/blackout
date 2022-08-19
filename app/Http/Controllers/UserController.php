@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\CreateUser;
 use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +17,7 @@ class UserController extends Controller
         Session::migrate(true);
         Session::put(User::CACHE_KEY_USER_ID, $user->getKey());
 
-        return response()->json($user);
+        return Redirect::route('home');
     }
 
     public function createOtherUser(CreateUser $request): Response

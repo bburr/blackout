@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GameStarted;
 use App\Exceptions\InvalidGameSettingsException;
 use App\Http\Requests\Game\StartGame;
 use App\Models\Game;
@@ -9,11 +10,76 @@ use App\Models\Lobby;
 use App\Models\User;
 use App\State\GameSettings;
 use App\State\GameState;
+use App\State\PlayerState;
+use App\State\TrickState;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class GameController extends Controller
 {
+    public function game(Game $game, Request $request): InertiaResponse
+    {
+        $gameState = new GameState($game);
+
+        $player = $gameState->getPlayers()->firstWhere(fn (PlayerState $playerState) => $playerState->getUser()->getKey() === $request->get('auth_user_id'));
+
+        abort_if($player === null, Response::HTTP_BAD_REQUEST, 'You are not in that game');
+
+        $users = $game->getLobby()->getUsers();
+
+        $currentRound = $gameState->getCurrentRound();
+        $currentTrick = $currentRound->getCurrentTrick();
+
+        $scoreTotals = [];
+
+        foreach ($gameState->getPreviousRoundScores() as $previousRoundScore) {
+            foreach ($previousRoundScore->getScores() as $playerIndex => $score) {
+                $scoreTotals[$playerIndex] = ($scoreTotals[$playerIndex] ?? 0) + $score;
+            }
+        }
+
+        $tricksWon = [];
+
+        /** @var TrickState $previousTrick */
+        foreach ($currentRound->getPreviousTricks() as $previousTrick) {
+            $tricksWon[$previousTrick->getTrickWinnerIndex()] = ($tricksWon[$previousTrick->getTrickWinnerIndex()] ?? 0) + 1;
+        }
+
+        return Inertia::render('Game', [
+            'gameId' => $game->getKey(),
+            'playerIndex' => $gameState->getPlayers()->search(fn (PlayerState $playerState) => $playerState->getUser()->getKey() === $player->getUser()->getKey()),
+            'dealerIndex' => $gameState->getDealerIndex(),
+            'nextPlayerIndexToBet' => $currentRound->getNextPlayerIndexToBet(),
+            'nextPlayerIndexToPlay' => $currentRound->getNextPlayerIndexToPlay(),
+            'players' => $gameState->getPlayers()->map(function (PlayerState $playerState, int $index) use ($users) {
+                $user = $users->find($playerState->getUser()->getKey());
+                return [
+                    'index' => $index,
+                    'name' => $user->getName(),
+                ];
+            }),
+            'currentRound' => [
+                'config' => [
+                    'roundNumber' => $currentRound->getRoundNumber(),
+                    'numTricks' => $currentRound->getNumTricks(),
+                ],
+                'trumpCard' => $currentRound->getTrumpCard(),
+                'bets' => $currentRound->getBets(),
+                'currentTrick' => [
+                    'leadingCard' => $currentTrick->getLeadingCard(),
+                    'plays' => $currentTrick->getPlays(),
+                ],
+                'tricksWon' => $tricksWon,
+            ],
+            'playerHand' => $player->getHand(),
+            'scoreTotals' => $scoreTotals,
+        ]);
+    }
+
     public function startGame(StartGame $request): Response
     {
         // check for current lobby key
@@ -62,8 +128,8 @@ class GameController extends Controller
             ])->setStatusCode(Response::HTTP_BAD_REQUEST);
         }
 
-        // todo send websocket msg to other players
+        broadcast(new GameStarted($lobby, $game))->toOthers();
 
-        return response()->json($game);
+        return Redirect::route('game', ['game' => $game->getKey()]);
     }
 }

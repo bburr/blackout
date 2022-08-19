@@ -13,4 +13,9 @@ class User extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function getName(): string
+    {
+        return $this->getAttribute('name');
+    }
 }

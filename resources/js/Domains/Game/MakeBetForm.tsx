@@ -7,39 +7,49 @@ import classNames from "classnames";
 import {useForm} from "@inertiajs/inertia-react";
 import useRoute from "@/Hooks/useRoute";
 
+interface Props {
+    gameId: string;
+}
 
-export default function CreateTeamForm() {
+export default function MakeBetForm({
+    gameId,
+}: Props) {
     const route = useRoute();
     const form = useForm({
-        name: '',
+        bet: '',
     });
 
-    function createUser() {
-        form.post(route('create-user'));
+    form.transform((data) => ({
+        bet: parseInt(data.bet),
+        gameId: gameId,
+    }));
+
+    function makeBet() {
+        form.post(route('perform-bet'));
     }
 
     return (
         <JetFormSection
-            title={'Welcome!'}
-            description={'Enter your first name to get started'}
-            onSubmit={createUser}
+            title={'Make Bet'}
+            description={''}
+            onSubmit={makeBet}
             renderActions={() => (
                 <>
                     <JetButton
                         className={classNames({'opacity-25': form.processing})}
                         disabled={form.processing}
                     >
-                        Start playing!
+                        Make Bet
                     </JetButton>
                 </>
             )}
         >
-            <JetLabel htmlFor={'name'}>Enter your name</JetLabel>
+            <JetLabel htmlFor={'bet'}>Make your bet</JetLabel>
             <JetInput
-                id={'name'}
-                type={'text'}
-                value={form.data.name}
-                onChange={e => form.setData('name', e.currentTarget.value)}
+                id={'bet'}
+                type={'number'}
+                value={form.data.bet}
+                onChange={e => form.setData('bet', e.currentTarget.value)}
             />
         </JetFormSection>
     );

@@ -9,9 +9,9 @@ class PlayCard extends Request
     public function rules()
     {
         return [
-            'game_id' => 'required',
-            'card_suit' => 'required',
-            'card_value' => 'required',
+            'gameId' => 'required',
+            'cardSuit' => 'required',
+            'cardValue' => 'required',
         ];
     }
 }

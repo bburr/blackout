@@ -8,14 +8,15 @@ use App\Jobs\MakeBetForNextPlayer;
 use App\Models\Game;
 use App\State\GameState;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoundController extends Controller
 {
-    public function performBet(PerformBet $request): void
+    public function performBet(PerformBet $request): Response
     {
         /** @var Game|null $game */
-        $game = Game::find($request->get('game_id'));
+        $game = Game::find($request->get('gameId'));
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
@@ -31,6 +32,8 @@ class RoundController extends Controller
         Bus::dispatch(new MakeBetForNextPlayer($gameState, $request->get('bet')));
 
         $gameState->save();
+
+        return Redirect::route('game', ['game' => $game->getKey()]);
     }
 
     public function performBetAsUser(PerformBetAsUser $request): void

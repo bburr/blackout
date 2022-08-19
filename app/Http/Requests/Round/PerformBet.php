@@ -10,7 +10,7 @@ class PerformBet extends Request
     {
         return [
             'bet' => 'required',
-            'game_id' => 'required',
+            'gameId' => 'required',
         ];
     }
 }
