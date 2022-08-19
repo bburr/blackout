@@ -34,7 +34,7 @@ class RoundController extends Controller
 
         $gameState->save();
 
-        broadcast(new BetWasMade($game))->toOthers();
+        broadcast(new BetWasMade($game));//->toOthers();
 
         return Redirect::route('game', ['game' => $game->getKey()]);
     }

@@ -42,7 +42,7 @@ class TrickController extends Controller
 
         $gameState->save();
 
-        broadcast(new CardWasPlayed($game))->toOthers();
+        broadcast(new CardWasPlayed($game));//->toOthers();
 
         return Redirect::route('game', ['game' => $game->getKey()]);
     }
