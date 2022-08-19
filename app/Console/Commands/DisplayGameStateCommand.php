@@ -36,6 +36,7 @@ class DisplayGameStateCommand extends Command
             ['Round Number', $currentRound->getRoundNumber()],
             ['Num Cards', $currentRound->getNumTricks()],
             ['Num Cards Asc?', $currentRound->isNumTricksAscending() ? 'Y' : 'N'],
+            ['Max Num Cards', $gameState->getGameSettings()->getMaxNumTricks()],
             ['Trump Card', $currentRound->getTrumpCard()],
             ['Leading Card', $currentRound->getCurrentTrick()->getLeadingCard()],
         ];
