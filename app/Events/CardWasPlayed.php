@@ -4,9 +4,12 @@ namespace App\Events;
 
 use App\Models\Game;
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Foundation\Events\Dispatchable;
 
 class CardWasPlayed extends BroadcastEvent
 {
+    use Dispatchable;
+
     public string $gameId;
 
     public function __construct(Game $game)

@@ -73,7 +73,8 @@ class LobbyController extends Controller
 
         Session::put(Lobby::CACHE_KEY_CURRENT_LOBBY_ID, $lobby->getKey());
 
-        broadcast(new UserJoinedLobby($lobby, $user));//->toOthers();
+//        broadcast(new UserJoinedLobby($lobby, $user))->toOthers();
+        UserJoinedLobby::dispatch($lobby, $user);
 
         return Redirect::route('lobby', ['lobby' => $lobby->getKey()]);
     }
