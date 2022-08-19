@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -19,7 +21,7 @@ class HandleInertiaRequests extends Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return string|null
      */
     public function version(Request $request): ?string
@@ -31,13 +33,30 @@ class HandleInertiaRequests extends Middleware
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
-            //
+            'jetstream' => function () use ($request) {
+                return [
+                    'flash' => $request->session()->get('flash', []),
+                ];
+            },
+            'user' => function () {
+                if (! Session::has(User::CACHE_KEY_USER_ID)) {
+                    return null;
+                }
+                $userId = (string) Session::get(User::CACHE_KEY_USER_ID);
+
+                /** @var User $user */
+                $user = User::find($userId);
+
+                return [
+                    'name' => $user->getName(),
+                ];
+            },
         ]);
     }
 }

@@ -35,6 +35,7 @@ class CardState extends AbstractState
         return [
             'suit' => $this->suitKey,
             'value' => $this->valueKey,
+            'str' => $this->__toString(),
         ];
     }
 
