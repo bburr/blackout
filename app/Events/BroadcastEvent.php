@@ -3,9 +3,9 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-abstract class BroadcastEvent implements ShouldBroadcast
+abstract class BroadcastEvent implements ShouldBroadcastNow
 {
     use InteractsWithSockets;
 }
