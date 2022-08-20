@@ -16,6 +16,13 @@ export default function () {
         starting_num_tricks: 1,
     });
 
+    form.transform((data) => ({
+        ending_num_tricks: parseInt(data.ending_num_tricks),
+        max_num_tricks: parseInt(data.max_num_tricks),
+        points_for_correct_bet: parseInt(data.points_for_correct_bet),
+        starting_num_tricks: parseInt(data.starting_num_tricks),
+    }));
+
     function startGame() {
         form.post(route('start-game'));
     }
