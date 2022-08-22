@@ -54,6 +54,10 @@ The following aspects of the rules are intended to be configurable via the game 
 * `state:display {gameId}` - This will display various information about the state of the given game
 * `game:quickstart` - This will start a game and make bets for the first round, then output the game ID
 
+## Local Box Commands
+* `npm run dev` - Starts vite
+* `redis-server` - Starts Redis Server
+
 ## Technologies in Use
 * [PHP 8.1](https://www.php.net/)
 * [Laravel 9](https://laravel.com/)
