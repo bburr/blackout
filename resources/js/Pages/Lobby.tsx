@@ -66,7 +66,7 @@ export default class Lobby extends React.Component {
         );
 
         return (
-            <AppLayout title={'Blackout Card Game'}>
+            <AppLayout title={'Lobby'}>
                 <div>
                     Lobby {this.props.lobbyId}
                 </div>

@@ -91,7 +91,7 @@ export default function Game({
     }
 
     return (
-        <AppLayout title={'Blackout Card Game'}>
+        <AppLayout title={'Playing a Game'}>
             <ul>
                 <li>Round Number: {currentRound.config.roundNumber}</li>
                 <li>Number of Tricks: {currentRound.config.numTricks}</li>

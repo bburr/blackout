@@ -46,14 +46,15 @@ export default function AppLayout({
                                 </div>
 
                                 {/* <!-- Navigation Links --> */}
-                                {/*<div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">*/}
-                                {/*    <JetNavLink*/}
-                                {/*        href={route('dashboard')}*/}
-                                {/*        active={route().current('dashboard')}*/}
-                                {/*    >*/}
-                                {/*        Dashboard*/}
-                                {/*    </JetNavLink>*/}
-                                {/*</div>*/}
+                                <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                    {/* using <a> instead of <JetNavLink> as the component does not handle external links well */}
+                                    <a className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition"
+                                        href="https://github.com/bburr/blackout"
+                                        target="_blank"
+                                    >
+                                        Github / Rules
+                                    </a>
+                                </div>
                             </div>
 
 

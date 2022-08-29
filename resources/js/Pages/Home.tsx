@@ -8,7 +8,7 @@ export default function Home() {
     const page = useTypedPage();
 
     return (
-        <AppLayout title={'Blackout Card Game'}>
+        <AppLayout title={'Home'}>
             <div>
                 {page.props.user === null
                     ? <CreateUserForm />
