@@ -99,22 +99,22 @@ export default function AppLayout({
                     </div>
 
                     {/* <!-- Responsive Navigation Menu --> */}
-                    {/*<div*/}
-                    {/*    className={classNames('sm:hidden', {*/}
-                    {/*        block: showingNavigationDropdown,*/}
-                    {/*        hidden: !showingNavigationDropdown,*/}
-                    {/*    })}*/}
-                    {/*>*/}
-                    {/*    <div className="pt-2 pb-3 space-y-1">*/}
-                    {/*        <JetResponsiveNavLink*/}
-                    {/*            href={route('dashboard')}*/}
-                    {/*            active={route().current('dashboard')}*/}
-                    {/*        >*/}
-                    {/*            Dashboard*/}
-                    {/*        </JetResponsiveNavLink>*/}
-                    {/*    </div>*/}
+                    <div
+                        className={classNames('sm:hidden', {
+                            block: showingNavigationDropdown,
+                            hidden: !showingNavigationDropdown,
+                        })}
+                    >
+                        <div className="pt-2 pb-3 space-y-1">
+                            <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition"
+                               href="https://github.com/bburr/blackout"
+                               target="_blank"
+                            >
+                                Github / Rules
+                            </a>
+                        </div>
 
-                    {/*</div>*/}
+                    </div>
                 </nav>
 
                 {/* <!-- Page Heading --> */}
