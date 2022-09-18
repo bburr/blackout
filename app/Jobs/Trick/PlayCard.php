@@ -1,26 +1,27 @@
 <?php declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Jobs\Trick;
 
 use App\Events\CardWasPlayed;
 use App\Exceptions\GameIsCompleteException;
-use App\Http\Requests\Trick\PlayCard;
-use App\Http\Requests\Trick\PlayCardAsUser;
 use App\Jobs\FinishGame;
 use App\Jobs\MakePlayForNextPlayer;
 use App\Models\Game;
 use App\State\CardState;
 use App\State\GameState;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
 
-class TrickController extends Controller
+class PlayCard
 {
-    public function playCard(PlayCard $request): Response
+    public function __construct(protected string $gameId, protected string $authUserId, protected string $cardSuit, protected int $cardValue)
+    {
+    }
+
+    public function handle(): Game
     {
         /** @var Game|null $game */
-        $game = Game::find($request->get('gameId'));
+        $game = Game::find($this->gameId);
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
@@ -31,10 +32,10 @@ class TrickController extends Controller
         $player = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToPlay());
 
         abort_if($player === null, Response::HTTP_BAD_REQUEST, 'It is not the time to play a card');
-        abort_unless($player->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to play');
+        abort_unless($player->getUser()->getKey() === $this->authUserId, Response::HTTP_BAD_REQUEST, 'It is not your turn to play');
 
         try {
-            Bus::dispatch(new MakePlayForNextPlayer($gameState, $player, new CardState($request->get('cardSuit'), $request->get('cardValue'))));
+            Bus::dispatch(new MakePlayForNextPlayer($gameState, $player, new CardState($this->cardSuit, $this->cardValue)));
         }
         catch (GameIsCompleteException $e) {
             Bus::dispatch(new FinishGame($gameState));
@@ -44,11 +45,6 @@ class TrickController extends Controller
 
         broadcast(new CardWasPlayed($game))->toOthers();
 
-        return Redirect::route('game', ['game' => $game->getKey()]);
-    }
-
-    public function playCardAsUser(PlayCardAsUser $request): void
-    {
-        $this->playCard($request);
+        return $game;
     }
 }

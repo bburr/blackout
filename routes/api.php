@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\GameController;
-use App\Http\Controllers\LobbyController;
-use App\Http\Controllers\PlayerController;
-use App\Http\Controllers\RoundController;
-use App\Http\Controllers\TrickController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\LobbyController;
+use App\Http\Controllers\Api\PlayerController;
+use App\Http\Controllers\Api\RoundController;
+use App\Http\Controllers\Api\TrickController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\HandleSessionUser;
 use Illuminate\Support\Facades\Route;
 

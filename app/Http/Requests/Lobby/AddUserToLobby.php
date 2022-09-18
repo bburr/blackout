@@ -14,4 +14,19 @@ class AddUserToLobby extends Request
             'user_id' => 'required',
         ];
     }
+
+    public function getInviteCode(): ?string
+    {
+        return $this->get('invite_code');
+    }
+
+    public function getLobbyId(): ?string
+    {
+        return $this->get('lobby_id');
+    }
+
+    public function getUserId(): string
+    {
+        return $this->get('user_id');
+    }
 }

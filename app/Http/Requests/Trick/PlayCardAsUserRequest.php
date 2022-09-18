@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Http\Requests\Round;
+namespace App\Http\Requests\Trick;
 
-class PerformBetAsUser extends PerformBet
+class PlayCardAsUserRequest extends PlayCardRequest
 {
     public function rules()
     {

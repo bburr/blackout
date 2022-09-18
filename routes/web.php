@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\GameController;
-use App\Http\Controllers\LobbyController;
-use App\Http\Controllers\RoundController;
-use App\Http\Controllers\TrickController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Web\RoundController;
+use App\Http\Controllers\Web\TrickController;
+use App\Http\Controllers\Web\LobbyController;
+use App\Http\Controllers\Web\UserController;
 use App\Http\Middleware\HandleSessionUser;
 use Illuminate\Support\Facades\Route;
 
+// todo show lobbies
+// todo in lobby, show games
 Route::inertia('/', 'Home')->name('home');
 
 Route::group(['middleware' => [HandleSessionUser::class]], function () {
