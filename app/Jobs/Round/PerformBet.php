@@ -1,23 +1,24 @@
 <?php declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Jobs\Round;
 
 use App\Events\BetWasMade;
-use App\Http\Requests\Round\PerformBet;
-use App\Http\Requests\Round\PerformBetAsUser;
 use App\Jobs\MakeBetForNextPlayer;
 use App\Models\Game;
 use App\State\GameState;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoundController extends Controller
+class PerformBet
 {
-    public function performBet(PerformBet $request): Response
+    public function __construct(protected string $gameId, protected string $authUserId, protected int $bet)
+    {
+    }
+
+    public function handle(): Game
     {
         /** @var Game|null $game */
-        $game = Game::find($request->get('gameId'));
+        $game = Game::find($this->gameId);
 
         abort_if($game === null, Response::HTTP_NOT_FOUND, 'No game found');
 
@@ -28,19 +29,14 @@ class RoundController extends Controller
         $bettingPlayer = $gameState->getPlayerAtIndex($gameState->getCurrentRound()->getNextPlayerIndexToBet());
 
         abort_if($bettingPlayer === null, Response::HTTP_BAD_REQUEST, 'It is not the time to bet');
-        abort_unless($bettingPlayer->getUser()->getKey() === $request->get('auth_user_id'), Response::HTTP_BAD_REQUEST, 'It is not your turn to bet');
+        abort_unless($bettingPlayer->getUser()->getKey() === $this->authUserId, Response::HTTP_BAD_REQUEST, 'It is not your turn to bet');
 
-        Bus::dispatch(new MakeBetForNextPlayer($gameState, $request->get('bet')));
+        Bus::dispatch(new MakeBetForNextPlayer($gameState, $this->bet));
 
         $gameState->save();
 
         broadcast(new BetWasMade($game))->toOthers();
 
-        return Redirect::route('game', ['game' => $game->getKey()]);
-    }
-
-    public function performBetAsUser(PerformBetAsUser $request): void
-    {
-        $this->performBet($request);
+        return $game;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Player;
 
-class GetHandAsUser extends GetHand
+class GetHandAsUserRequest extends GetHandRequest
 {
     public function rules()
     {

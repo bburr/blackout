@@ -1,18 +1,26 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Feature\Http\Controllers;
+namespace Tests\Feature\Http\Controllers\Api;
 
+use App\Models\Lobby;
 use Tests\Feature\AbstractFeatureTest;
 
 class LobbyControllerTest extends AbstractFeatureTest
 {
     public function testCreateLobby(): void
     {
-        $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
+        $userResposne = $this->postJson('/api/v1/user/create-user', ['name' => 'Bob']);
 
         $response = $this->postJson('/api/v1/lobby/create-lobby');
 
         $response->assertStatus(200);
+        $response->assertSessionHas(Lobby::CACHE_KEY_CURRENT_LOBBY_ID);
+        $this->assertDatabaseHas(Lobby::class, ['uuid' => $response->json('uuid')]);
+        $this->assertDatabaseHas('lobby_user', [
+            'lobby_uuid' => $response->json('uuid'),
+            'user_uuid' => $userResposne->json('uuid'),
+            'is_owner' => 1,
+        ]);
     }
 
     public function testJoinLobby(): void

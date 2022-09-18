@@ -43,11 +43,12 @@ class QuickStartGameCommand extends Command
             'starting_num_tricks' => 1,
             'max_num_tricks' => 5,
             'ending_num_tricks' => 1,
+            'points_for_correct_bet' => 10,
         ]));
 
-        for ($i = 0; $i < count($names); $i++) {
-            Bus::dispatch(new MakeBetForNextPlayer($gameState, 1));
-        }
+//        for ($i = 0; $i < count($names); $i++) {
+//            Bus::dispatch(new MakeBetForNextPlayer($gameState, 1));
+//        }
 
         $gameState->save();
 

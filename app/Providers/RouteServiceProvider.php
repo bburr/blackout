@@ -30,13 +30,8 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api/v1')
-                ->group(base_path('routes/api.php'));
-
-            Route::middleware('web')
-                ->withoutMiddleware(ShareInertiaData::class)
-                ->group(base_path('routes/web.php'));
+            $this->registerApiRoutes();
+            $this->registerWebRoutes();
         });
     }
 
@@ -51,5 +46,24 @@ class RouteServiceProvider extends ServiceProvider
             /** @phpstan-ignore-next-line  */
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+    }
+
+    protected function registerApiRoutes(): void
+    {
+        // API routes currently disabled in prod
+        if (\App::environment('production')) {
+            return;
+        }
+
+        Route::middleware('api')
+            ->prefix('api/v1')
+            ->group(base_path('routes/api.php'));
+    }
+
+    protected function registerWebRoutes(): void
+    {
+        Route::middleware('web')
+            ->withoutMiddleware(ShareInertiaData::class)
+            ->group(base_path('routes/web.php'));
     }
 }
